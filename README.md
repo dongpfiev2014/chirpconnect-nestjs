@@ -5,7 +5,7 @@
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+  <p align="center">ChirpConnect - Social Media</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
@@ -24,7 +24,28 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Chirpconnect is a social networking application built with NestJS for the backend. It provides a platform for users to connect, interact, and share content. The application includes features such as user profiles, tweets, followers, messaging, and real-time notifications, making it a robust solution for social networking needs.
+
+## Features
+
+- **User Profiles:** Create and manage user profiles with personalized information.
+- **Tweets**: Users can post, like, and retweet tweets.
+- **Followers**: Users can follow and unfollow others.
+- **Messaging:** Real-time chat functionality for user communication.
+- **Real-Time Notifications:** Receive updates and notifications about interactions and activities.
+- **Content Sharing:** Share posts, updates, and media with your network.
+
+## Live Demo
+
+Check out the live demo of ChirpConnect:
+
+[https://your-live-demo-url](#)
+
+## Technologies Used
+
+- **Backend:** NestJS
+- **Database:** MS SQL
+- **Real-Time Communication:** SocketIO
 
 ## Installation
 
@@ -64,9 +85,8 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Dong Khong](https://github.com/dongpfiev2014)
+- Website - [https://dongkhong.vercel.app](https://dongkhong.vercel.app)
 
 ## License
 
