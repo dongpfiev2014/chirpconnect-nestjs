@@ -1,20 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
   console.log('Hello');
-  const add = (a, b) => {
-    return a + b;
-  };
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+  app.setGlobalPrefix('api/v1', { exclude: [''] });
 
-  const x = add(5.6, 3);
-  const y = add(4, 3);
-  const z = add(15, 3);
-  console.log('Sida');
-  console.log(x, y, z);
-
-  console.log([1, 2, 3], [4, 5, 6]);
+  await app.listen(3000);
 }
 bootstrap();
