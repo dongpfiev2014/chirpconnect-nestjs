@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,11 +11,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
   async signUp(createUserInput: CreateUserInput): Promise<User> {
     const { FirstName, LastName, Username, Email, Password } = createUserInput;
@@ -41,8 +45,31 @@ export class UserService {
     }
   }
 
-  findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  async findAll(): Promise<User[]> {
+    const users: User[] = await this.cacheManager.get(
+      'AdminPermission-AllUsers',
+    );
+    if (users && users.length !== 0) {
+      console.log('Users from cache');
+      return users.map((user) => ({
+        ...user,
+        CreatedAt: new Date(user.CreatedAt),
+        UpdatedAt: new Date(user.UpdatedAt),
+      }));
+    }
+    const resultPromise = this.userRepository.find();
+
+    resultPromise.then((result) => {
+      this.cacheManager
+        .set('AdminPermission-AllUsers', result, 10000)
+        .then(() => {
+          console.log('Users from Database');
+        });
+    });
+
+    return resultPromise;
+
+    // return this.userRepository.find();
   }
 
   async findOne(UserId: string): Promise<User> {
@@ -72,5 +99,14 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return true;
+  }
+
+  async testRedis() {
+    const test = await this.cacheManager.get('healthCheck');
+    if (test) {
+      return test;
+    }
+    this.cacheManager.set('healthCheck', `Hello World - From Redis`, 10000);
+    return 'Hello World - From server';
   }
 }

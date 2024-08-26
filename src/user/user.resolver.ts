@@ -37,4 +37,9 @@ export class UserResolver {
   ): Promise<boolean> {
     return this.userService.remove(UserId);
   }
+
+  @Query(() => String)
+  testRedis() {
+    return this.userService.testRedis();
+  }
 }
