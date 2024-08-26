@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.4",
     "@apollo/server": "^4.11.0",
     "@hapi/joi": "^17.1.1",
     "@nestjs/apollo": "^12.2.0",

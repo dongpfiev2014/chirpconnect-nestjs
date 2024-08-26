@@ -1,8 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
-@Controller()
+@Controller('')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -11,5 +11,13 @@ export class AppController {
   @CacheTTL(60000)
   async getHello() {
     return this.appService.getHello();
+  }
+
+  @Get('')
+  @Render('home.pug')
+  root() {
+    return {
+      pageTitle: 'Chirp Connect',
+    };
   }
 }

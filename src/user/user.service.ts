@@ -20,21 +20,18 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
-  async signUp(createUserInput: CreateUserInput): Promise<User> {
-    const { FirstName, LastName, Username, Email, Password } = createUserInput;
 
+  private async hashedPassword(Password: string) {
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(Password, salt);
+    return bcrypt.hash(Password, salt);
+  }
 
-    const newUser = this.userRepository.create({
-      FirstName,
-      LastName,
-      Username,
-      Email,
-      Password: hashedPassword,
-    });
-
+  async signUp(createUserInput: CreateUserInput): Promise<User> {
     try {
+      const newUser = this.userRepository.create({
+        ...createUserInput,
+        Password: await this.hashedPassword(createUserInput.Password),
+      });
       return await this.userRepository.save(newUser);
     } catch (error) {
       if (error.number === 2627) {
@@ -87,7 +84,12 @@ export class UserService {
     updateUserInput: UpdateUserInput,
   ): Promise<User> {
     const existingUser = await this.findOne(UserId);
-    Object.assign(existingUser, updateUserInput);
+    Object.assign(existingUser, {
+      ...updateUserInput,
+      Password: updateUserInput.Password
+        ? await this.hashedPassword(updateUserInput.Password)
+        : existingUser.Password,
+    });
 
     return this.userRepository.save(existingUser);
   }

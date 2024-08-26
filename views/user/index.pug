@@ -1,0 +1,18 @@
+html
+    head 
+        title #{pageTitle}
+    body
+        h1 This is awesome 
+
+        div Hi 
+            div Bye 
+
+        ul 
+            each user in users
+             li= user.name + " " + user.email
+        
+        div #{users[3].age}
+        
+        script(type="text/javascript").
+            console.log("Hello, JavaScript")
+
