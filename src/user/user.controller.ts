@@ -1,10 +1,11 @@
 import { ApolloClient } from '@apollo/client/core';
-import { Controller, Get, Inject, Render } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Render } from '@nestjs/common';
 import {
   CREATE_USER_MUTATION,
   FIND_ALL_USERS_QUERY,
 } from 'src/graphql/queries/user.queries';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
+import { CreateUserInput } from './dto/create-user.input';
 
 @Controller('user')
 export class UserController {
@@ -64,6 +65,38 @@ export class UserController {
       users: users.findAllUsers,
       newUser: newUser.createUser,
       pageTitle: 'User page Hahaha',
+    };
+  }
+
+  @Get('form')
+  @Render('user/form')
+  async getForm() {
+    return { title: 'User Form' };
+  }
+
+  @Get('submit')
+  @Render('user/submit')
+  getFormSubmit() {
+    return {
+      title: 'User Form Submit',
+      user: {
+        FirstName: 'John',
+        LastName: 'Doe',
+        Username: 'john.doe10',
+        Email: 'john.doe10@example.com',
+        Password: 'Password123@',
+      },
+    };
+  }
+
+  @Post('submit')
+  @Render('user/submit')
+  submitForm(@Body() createUserDto: CreateUserInput) {
+    console.log('User Data:', createUserDto);
+
+    return {
+      title: 'Form Submitted',
+      user: createUserDto,
     };
   }
 }

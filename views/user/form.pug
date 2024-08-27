@@ -1,0 +1,24 @@
+doctype html
+html
+  head
+    title= title
+  body
+    h1 User Form
+    form(action="/user/submit", method="post")
+      div
+        label(for="FirstName") First Name:
+        input(type="text", name="FirstName", id="FirstName")
+      div
+        label(for="LastName") Last Name:
+        input(type="text", name="LastName", id="LastName")
+      div
+        label(for="Username") Username:
+        input(type="text", name="Username", id="Username")
+      div
+        label(for="Email") Email:
+        input(type="email", name="Email", id="Email")
+      div
+        label(for="Password") Password:
+        input(type="password", name="Password", id="Password")
+      div
+        button(type="submit") Submit

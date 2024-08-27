@@ -10,6 +10,7 @@ export class GraphQLService {
       const { data } = await this.apolloClient.query({
         query,
         variables,
+        fetchPolicy: 'cache-first',
       });
       return data;
     } catch (error) {
@@ -24,6 +25,25 @@ export class GraphQLService {
       const { data } = await this.apolloClient.mutate({
         mutation,
         variables,
+        // update: (cache, { data }) => {
+        //   if (data && data.createUser) {
+        //     const existingData = cache.readQuery({
+        //       query: FIND_ALL_USERS_QUERY,
+        //     });
+
+        //     if (existingData) {
+        //       const updatedData = {
+        //         ...existingData,
+        //         users: [...existingData.users, data.createUser],
+        //       };
+
+        //       cache.writeQuery({
+        //         query: FIND_ALL_USERS_QUERY,
+        //         data: updatedData,
+        //       });
+        //     }
+        //   }
+        // },
       });
       return data;
     } catch (error) {

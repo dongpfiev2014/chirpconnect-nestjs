@@ -1,5 +1,11 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsEmail, IsString, IsStrongPassword, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+  Length,
+} from 'class-validator';
 
 @InputType()
 export class CreateUserInput {
@@ -33,6 +39,7 @@ export class CreateUserInput {
     defaultValue:
       'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1724569868/images/profilePic.png',
   })
+  @IsOptional()
   @IsString()
   @Length(0, 255)
   ProfilePic?: string;

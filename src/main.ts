@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const logger = new Logger();
@@ -19,7 +20,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.setGlobalPrefix('api/v1', { exclude: ['user', ''] });
+  app.use(cookieParser());
+
+  // app.setGlobalPrefix('api/v1', { exclude: ['/user/(.*)', ''] });
 
   const configService = app.get(ConfigService);
   const corsOrigin = configService.get<string>('CORS_ORIGIN');

@@ -10,6 +10,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { ApolloClientModule } from './apollo-client/apollo-client.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { ApolloClientModule } from './apollo-client/apollo-client.module';
     }),
     UserModule,
     ApolloClientModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

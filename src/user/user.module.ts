@@ -10,5 +10,6 @@ import { ApolloClientModule } from 'src/apollo-client/apollo-client.module';
   imports: [TypeOrmModule.forFeature([User]), ApolloClientModule],
   providers: [UserResolver, UserService],
   controllers: [UserController],
+  exports: [UserService],
 })
 export class UserModule {}

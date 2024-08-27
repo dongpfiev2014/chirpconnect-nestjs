@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
@@ -101,6 +102,15 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return true;
+  }
+
+  async verifyUser(Email: string, Password: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { Email } });
+    const passwordIsValid = await bcrypt.compare(Password, user.Password);
+    if (!passwordIsValid) {
+      throw new UnauthorizedException('Credentials are not valid');
+    }
+    return user;
   }
 
   async testRedis() {
