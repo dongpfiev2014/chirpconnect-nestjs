@@ -9,8 +9,8 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Mutation(() => User)
-  signUp(@Args('createUserInput') createUserInput: CreateUserInput) {
-    return this.userService.signUp(createUserInput);
+  createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
+    return this.userService.create(createUserInput);
   }
 
   @Query(() => [User], { name: 'findAllUsers' })

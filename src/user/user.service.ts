@@ -26,7 +26,7 @@ export class UserService {
     return bcrypt.hash(Password, salt);
   }
 
-  async signUp(createUserInput: CreateUserInput): Promise<User> {
+  async create(createUserInput: CreateUserInput): Promise<User> {
     try {
       const newUser = this.userRepository.create({
         ...createUserInput,

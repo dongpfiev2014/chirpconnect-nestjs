@@ -1,12 +1,41 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { ApolloClient } from '@apollo/client/core';
+import { Controller, Get, Inject, Render } from '@nestjs/common';
+import {
+  CREATE_USER_MUTATION,
+  FIND_ALL_USERS_QUERY,
+} from 'src/graphql/queries/user.queries';
+import { GraphQLService } from 'src/graphql/service/graphql.service';
 
 @Controller('user')
 export class UserController {
+  private readonly graphqlService: GraphQLService;
+  constructor(
+    @Inject('APOLLO_CLIENT') private readonly apolloClient: ApolloClient<any>,
+  ) {
+    this.graphqlService = new GraphQLService(apolloClient);
+  }
+
   @Get()
   @Render('user/index')
-  root() {
+  async root() {
+    const userInput = {
+      FirstName: 'John',
+      LastName: 'Doe',
+      Username: 'john.doe10',
+      Email: 'john.doe10@example.com',
+      Password: 'Password123@',
+    };
+
+    const users =
+      await this.graphqlService.fetchData<any>(FIND_ALL_USERS_QUERY);
+
+    const newUser = await this.graphqlService.mutateData<any>(
+      CREATE_USER_MUTATION,
+      { input: userInput },
+    );
+
     return {
-      users: [
+      fakeUsers: [
         {
           id: 1,
           name: 'John Doe',
@@ -32,6 +61,8 @@ export class UserController {
           age: 33,
         },
       ],
+      users: users.findAllUsers,
+      newUser: newUser.createUser,
       pageTitle: 'User page Hahaha',
     };
   }

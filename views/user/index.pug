@@ -8,9 +8,23 @@ html
             div Bye 
 
         ul 
-            each user in users
-             li= user.name + " " + user.email
+            each fakeUser in fakeUsers
+             li= fakeUser.name + " " + fakeUser.email
+        br
+        br
+        br
+        br
         
+        ul 
+            each user in users
+             li= user.FirstName + " " + user.LastName + " " + user.Email + " " + user.Username
+        
+        br
+
+        h4 Welcome the new employee 
+            h5= newUser.FirstName + " " + newUser.LastName + " " + newUser.Email + " " + newUser.Username
+        
+
         div #{users[3].age}
         
         script(type="text/javascript").

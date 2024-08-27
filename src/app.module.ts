@@ -9,6 +9,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { ApolloClientModule } from './apollo-client/apollo-client.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { redisStore } from 'cache-manager-redis-yet';
       }),
     }),
     UserModule,
+    ApolloClientModule,
   ],
   controllers: [AppController],
   providers: [
