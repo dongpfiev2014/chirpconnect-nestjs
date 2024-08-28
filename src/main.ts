@@ -5,12 +5,15 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
 import * as cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.useStaticAssets(path.join(__dirname, '..', 'public'));
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(cookieParser());
+  app.useStaticAssets(path.join(__dirname, '..', 'public')); // public folder
   app.setBaseViewsDir(path.join(__dirname, '..', 'views'));
   app.setViewEngine('pug');
 
@@ -20,7 +23,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.use(cookieParser());
 
   // app.setGlobalPrefix('api/v1', { exclude: ['/user/(.*)', ''] });
 

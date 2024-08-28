@@ -17,20 +17,20 @@ export class UserResolver {
     return this.userService.create(createUserInput);
   }
 
-  @Query(() => [User], { name: 'findAllUsers' })
   @UseGuards(GqlAuthGuard)
+  @Query(() => [User], { name: 'findAllUsers' })
   findAll() {
     return this.userService.findAll();
   }
 
-  @Query(() => User, { name: 'findOneUser' })
   @UseGuards(GqlAuthGuard)
+  @Query(() => User, { name: 'findOneUser' })
   findOne(@Args('UserId', { type: () => ID }) UserId: string) {
     return this.userService.findOne(UserId);
   }
 
-  @Mutation(() => User)
   @UseGuards(GqlAuthGuard)
+  @Mutation(() => User)
   updateUser(
     @CurrentUser() user: TokenPayload,
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
@@ -38,8 +38,8 @@ export class UserResolver {
     return this.userService.update(user.UserId, updateUserInput);
   }
 
-  @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean)
   removeUser(@CurrentUser() user: TokenPayload): Promise<boolean> {
     return this.userService.remove(user.UserId);
   }

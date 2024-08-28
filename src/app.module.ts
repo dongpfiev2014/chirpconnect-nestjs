@@ -45,6 +45,9 @@ import { AuthModule } from './auth/auth.module';
       driver: ApolloDriver,
       autoSchemaFile: true,
       debug: true,
+      playground: true,
+      introspection: true,
+      context: ({ req }) => ({ req }),
     }),
     CacheModule.registerAsync({
       isGlobal: true,
