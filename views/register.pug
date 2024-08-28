@@ -5,7 +5,17 @@ block content
         h1 Register
         form#registerForm(method="post", onsubmit="event.preventDefault(); validateForm();")
 
-            p.errorMessage #{errorMessage}
+            if errorMessage
+                .alert.alert-danger.custom-alert(role="alert")
+                    | #{errorMessage}
+
+            if errorDetailMessage
+                .alert.alert-danger.custom-alert(role="alert")
+                    | #{errorDetailMessage}
+
+            if successMessage
+                .alert.alert-success.custom-alert(role="alert")
+                    | #{successMessage}
 
             input(type="text", name="FirstName", placeholder="First name", value=FirstName, required="")
             input(type="text", name="LastName", placeholder="Last name", value=LastName, required="")
@@ -23,10 +33,26 @@ block content
         const form = document.getElementById("registerForm")
 
         function validateForm() {
+            const existingAlerts = form.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
             if(passwordField.value != passwordConfirmField.value) {
-                alert("Passwords do not match. Please try again.")
+                // Create an alert using Bootstrap styles
+                const errorAlert = document.createElement('div');
+                errorAlert.className = 'alert alert-danger custom-alert';
+                errorAlert.role = 'alert';
+                errorAlert.innerText = 'Passwords do not match. Please try again.';
+                form.prepend(errorAlert);
             }
             else {
+                passwordConfirmField.remove();
                 form.submit();
             }
+        }
+
+             // Redirect after 2 seconds if successMessage exists
+        if (document.querySelector('.alert-success')) {
+            setTimeout(() => {
+                window.location.href = '/auth/login';
+            }, 2000); // 2000 milliseconds = 2 seconds
         }

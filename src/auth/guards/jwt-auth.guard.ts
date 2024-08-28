@@ -1,25 +1,15 @@
 import { ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
-import { Observable } from 'rxjs';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const ctx = context.switchToHttp();
-    const request = ctx.getRequest<Request>();
-    const response = ctx.getResponse<Response>();
+  handleRequest(err, user, info, context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest();
 
-    try {
-      if (!request.user) {
-        response.redirect('/auth/login');
-        return false;
-      }
-      return true;
-    } catch (error) {
-      response.redirect('/auth/login');
-      return false;
+    if (!user) {
+      request.jwtAuthError = 'Invalid credentials';
+      return null;
     }
+
+    return user;
   }
 }

@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  // NestModule, MiddlewareConsumer
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,6 +14,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { ApolloClientModule } from './apollo-client/apollo-client.module';
 import { AuthModule } from './auth/auth.module';
+// import { RedirectMiddleware } from './middleware/redirect.middleware';
+import { RedirectInterceptor } from './interceptor/redirect.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -75,6 +81,10 @@ import { AuthModule } from './auth/auth.module';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RedirectInterceptor,
+    },
 
     // This only works on CRUD - REST API, not for GraphQL
 
@@ -84,4 +94,9 @@ import { AuthModule } from './auth/auth.module';
     // },
   ],
 })
-export class AppModule {}
+// implements NestModule
+export class AppModule {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(RedirectMiddleware).exclude('/auth/login').forRoutes('*');
+  // }
+}

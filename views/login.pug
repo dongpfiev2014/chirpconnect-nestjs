@@ -3,9 +3,27 @@ extends layouts/login-layout.pug
 block content
     .loginContainer 
         h1 Login 
-        form(action="/login" method="post")
-            input(type="text", name="logUsername", placeholder="Username or email", required="")
-            input(type="password", name="logPassword", placeholder="Password", required="")
+        form(action="/auth/login" method="post")
+
+            if errorMessage
+                .alert.alert-danger.custom-alert(role="alert")
+                    | #{errorMessage}
+
+            if successMessage
+                .alert.alert-success.custom-alert(role="alert")
+                    | #{successMessage}
+
+            input(type="email", name="Email", placeholder="Email", value=Email, required="")
+            input(type="password", name="Password", placeholder="Password", required="")
             input(type="submit", value="Login")
         a(href="/auth/register") Need an account? Register here. 
+
+    script.
+        const form = document.getElementById("registerForm")
+
+        if (document.querySelector('.alert-success')) {
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000); 
+        }
             

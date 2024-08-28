@@ -1,4 +1,4 @@
-import { Controller, Get, Render, UseGuards } from '@nestjs/common';
+import { Controller, Get, Render, Req, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -17,9 +17,12 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('')
   @Render('home.pug')
-  root() {
-    return {
-      pageTitle: 'Chirp Connect',
-    };
+  root(@Req() req) {
+    setTimeout(() => {
+      return {
+        user: req.user,
+        pageTitle: 'Chirp Connect',
+      };
+    }, 5000);
   }
 }

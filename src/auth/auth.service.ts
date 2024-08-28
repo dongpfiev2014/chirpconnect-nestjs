@@ -1,22 +1,15 @@
-import {
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { User } from 'src/user/entities/user.entity';
 import { TokenPayload } from './token-payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
-import { CreateUserInput } from 'src/user/dto/create-user.input';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
   ) {}
   async login(user: User, response: Response) {
     const expires = new Date();
@@ -36,18 +29,6 @@ export class AuthService {
       httpOnly: true,
       expires,
     });
-  }
-
-  async register(payload: CreateUserInput): Promise<User> {
-    try {
-      const newUser = await this.userService.create(payload);
-      return newUser;
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        throw new ConflictException('User already exists');
-      }
-      throw new InternalServerErrorException('Something went wrong');
-    }
   }
 
   logout(response: Response) {
