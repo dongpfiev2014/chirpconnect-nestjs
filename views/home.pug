@@ -1,7 +1,11 @@
 extends layouts/main-layout.pug
 
 block content
+    +createPostForm(userLoggedIn)
+
+    br
+
     h1 This is awesome 
     h2 Con mẹ mày
     
-    p #()
+    p #{userLoggedIn.Email}

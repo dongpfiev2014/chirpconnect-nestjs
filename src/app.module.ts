@@ -17,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
 // import { RedirectMiddleware } from './middleware/redirect.middleware';
 import { RedirectInterceptor } from './interceptor/redirect.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     UserModule,
     ApolloClientModule,
     AuthModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [

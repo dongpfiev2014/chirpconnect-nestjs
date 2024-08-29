@@ -17,22 +17,22 @@ export class User {
   UserId: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'nvarchar', length: 255, nullable: false })
   FirstName: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'nvarchar', length: 255, nullable: false })
   LastName: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  @Column({ type: 'nvarchar', length: 255, nullable: false, unique: true })
   Username: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  @Column({ type: 'nvarchar', length: 255, nullable: false, unique: true })
   Email: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'nvarchar', length: 255, nullable: false })
   Password: string;
 
   @Field({

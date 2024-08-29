@@ -18,11 +18,10 @@ export class AppController {
   @Get('')
   @Render('home.pug')
   root(@Req() req) {
-    setTimeout(() => {
-      return {
-        user: req.user,
-        pageTitle: 'Chirp Connect',
-      };
-    }, 5000);
+    console.log(req.user);
+    return {
+      userLoggedIn: req.user,
+      pageTitle: 'Home',
+    };
   }
 }
