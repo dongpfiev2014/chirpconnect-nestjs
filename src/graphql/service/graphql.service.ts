@@ -10,7 +10,8 @@ export class GraphQLService {
       const { data } = await this.apolloClient.query({
         query,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: 'network-only',
+        // fetchPolicy: 'cache-first',           Don't use this in production if you don't want fetch the new data
       });
       return data;
     } catch (error) {

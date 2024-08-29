@@ -1,8 +1,10 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Post } from 'src/post/entities/post.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -46,6 +48,9 @@ export class User {
       'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1724569868/images/profilePic.png',
   })
   ProfilePic: string;
+
+  @OneToMany(() => Post, (post) => post.PostedBy)
+  Posts: Post[];
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })

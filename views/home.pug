@@ -2,10 +2,7 @@ extends layouts/main-layout.pug
 
 block content
     +createPostForm(userLoggedIn)
+    .postsContainer
 
-    br
-
-    h1 This is awesome 
-    h2 Con mẹ mày
-    
-    p #{userLoggedIn.Email}
+    block scripts
+    script(src="/js/home.js")

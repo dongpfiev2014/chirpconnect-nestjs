@@ -1,7 +1,16 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 @InputType()
 export class CreatePostInput {
-  @Field(() => Int, { description: 'Example field (placeholder)' })
-  exampleField: number;
+  @Field()
+  @MinLength(1)
+  @IsString()
+  Content: string;
+
+  @Field({
+    defaultValue: false,
+  })
+  @IsOptional()
+  Pinned?: boolean;
 }
