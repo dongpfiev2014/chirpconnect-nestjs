@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -29,6 +30,10 @@ export class Post {
   @Field()
   @Column({ type: 'bit', default: false })
   Pinned: boolean;
+
+  @Field(() => [User])
+  @ManyToMany(() => User, (user) => user.LikedPosts)
+  LikedBy: User[];
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })

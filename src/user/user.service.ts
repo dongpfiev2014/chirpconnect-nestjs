@@ -73,7 +73,10 @@ export class UserService {
   async findOne(UserId: string): Promise<User> {
     let found: User;
     try {
-      found = await this.userRepository.findOne({ where: { UserId } });
+      found = await this.userRepository.findOne({
+        where: { UserId },
+        relations: ['Posts', 'LikedPosts'],
+      });
       return found;
     } catch (error) {
       throw new NotFoundException('User not found');

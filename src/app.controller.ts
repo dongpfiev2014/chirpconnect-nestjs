@@ -16,9 +16,8 @@ export class AppController {
   }
   @UseGuards(JwtAuthGuard)
   @Get('')
-  @Render('home.pug')
+  @Render('home')
   root(@Req() req) {
-    console.log(req.user);
     return {
       userLoggedIn: req.user,
       pageTitle: 'Home',

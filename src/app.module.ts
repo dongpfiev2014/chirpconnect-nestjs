@@ -16,8 +16,9 @@ import { ApolloClientModule } from './apollo-client/apollo-client.module';
 import { AuthModule } from './auth/auth.module';
 // import { RedirectMiddleware } from './middleware/redirect.middleware';
 import { RedirectInterceptor } from './interceptor/redirect.interceptor';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { PostModule } from './post/post.module';
+import { HttpExceptionFilter } from './exception/http-exception.filter';
 
 @Module({
   imports: [
@@ -86,6 +87,10 @@ import { PostModule } from './post/post.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: RedirectInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
 
     // This only works on CRUD - REST API, not for GraphQL

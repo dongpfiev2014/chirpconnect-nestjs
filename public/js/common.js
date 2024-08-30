@@ -39,7 +39,13 @@ function createPostHtml(postData) {
   }
 
   var displayName = postedBy.FirstName + ' ' + postedBy.LastName;
-  var timestamp = timeDifference(new Date(), new Date(postData.CreatedAt));
+
+  var timezoneOffsetInHours = getTimezoneOffsetInHours();
+  var localCreatedAt = addHoursToUTC(
+    postData.CreatedAt,
+    timezoneOffsetInHours,
+  ).toISOString();
+  var timestamp = timeDifference(new Date(), new Date(localCreatedAt));
 
   return `<div class='post'>
               <div class='mainContentContainer'>
@@ -75,6 +81,17 @@ function createPostHtml(postData) {
                   </div>
               </div>
           </div>`;
+}
+
+function getTimezoneOffsetInHours() {
+  var offset = new Date().getTimezoneOffset();
+  return -offset / 60;
+}
+
+function addHoursToUTC(utcDateString, hours) {
+  var date = new Date(utcDateString);
+  date.setHours(date.getHours() + hours);
+  return date;
 }
 
 function timeDifference(current, previous) {

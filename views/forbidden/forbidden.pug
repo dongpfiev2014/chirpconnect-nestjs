@@ -1,0 +1,18 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  title Unauthorized
+  link(rel='stylesheet', href='/css/forbidden.css')
+h1 Forbidden!
+h2 Code 403
+#jail
+  svg#spinner(xmlns='http://www.w3.org/2000/svg', xmlns:xhtml='http://www.w3.org/1999/xhtml', xmlns:xlink='http://www.w3.org/1999/xlink', version='1.1', viewbox='0 0 1000 1000', preserveaspectratio='xMinYMin')
+    // thank you https://stackoverflow.com/posts/15496546/revisions
+    defs
+      path#textPath(d='M 250 500 A 250,250 0 1 1 250 500.0001')
+    text(x='0', y='0', text-anchor='left', style='font-size:90pt;')
+      textpath(xlink:href='#textPath', startoffset='0%') MOUSE JAIL
+      textpath(xlink:href='#textPath', startoffset='50%') MOUSE JAIL
+  #cursor
+script(src='/js/forbidden.js')

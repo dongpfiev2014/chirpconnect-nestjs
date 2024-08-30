@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
@@ -42,15 +44,21 @@ export class User {
       'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1724569868/images/profilePic.png',
   })
   @Column({
-    type: 'varchar',
+    type: 'nvarchar',
     length: 255,
     default:
       'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1724569868/images/profilePic.png',
   })
   ProfilePic: string;
 
+  @Field(() => [Post])
   @OneToMany(() => Post, (post) => post.PostedBy)
   Posts: Post[];
+
+  @Field(() => [Post])
+  @ManyToMany(() => Post, (post) => post.LikedBy)
+  @JoinTable()
+  LikedPosts: Post[];
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })

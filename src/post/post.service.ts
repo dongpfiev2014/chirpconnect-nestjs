@@ -1,15 +1,22 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { Post } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInput } from 'src/user/dto/user.input';
+import { DeleteResponse } from './type/delete-response.type';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
   async create(
     createPostInput: CreatePostInput,
@@ -30,20 +37,68 @@ export class PostService {
     const posts = this.postRepository.find({
       where: { PostedBy: user },
       relations: ['PostedBy'],
+      order: { CreatedAt: 'DESC' },
     });
-    console.log(await posts);
     return posts;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(PostId: string, user: UserInput): Promise<Post> {
+    const found = await this.postRepository.findOne({
+      where: { PostId, PostedBy: user },
+      relations: ['PostedBy', 'LikedBy'],
+    });
+
+    if (!found) {
+      throw new NotFoundException(`Post with ${PostId} not found`);
+    }
+    return found;
   }
 
-  update(id: number, updatePostInput: UpdatePostInput) {
-    return `This action updates a #${id} post`;
+  async updatePost(
+    PostId: string,
+    updatePostInput: UpdatePostInput,
+    user: UserInput,
+  ): Promise<Post> {
+    const existingPost = await this.findOne(PostId, user);
+    const updatedPost = Object.assign(existingPost, updatePostInput);
+    await this.postRepository.save(updatedPost);
+    return updatedPost;
   }
 
-  remove(user: UserInput, PostId: string) {
-    return this.postRepository.delete({ PostId, PostedBy: user });
+  async updatePostLikes(PostId: string, user: UserInput) {
+    const post = await this.postRepository.findOne({
+      where: { PostId },
+      relations: ['LikedBy'],
+    });
+    const userEntity = await this.userRepository.findOne({
+      where: { UserId: user.UserId },
+    });
+
+    if (!post) {
+      throw new NotFoundException(`Post with ${PostId} not found`);
+    }
+    // Check if user already liked the post
+    const hasLiked = post.LikedBy.some(
+      (likedUser) => likedUser.UserId === user.UserId,
+    );
+
+    if (hasLiked) {
+      // Remove user from the likes array
+      post.LikedBy = post.LikedBy.filter(
+        (likedUser) => likedUser.UserId !== user.UserId,
+      );
+    } else {
+      // Add user to the likes array
+      post.LikedBy.push(userEntity);
+    }
+    return await this.postRepository.save(post);
+  }
+
+  async remove(PostId: string, user: UserInput): Promise<DeleteResponse> {
+    const result = await this.postRepository.delete({ PostId, PostedBy: user });
+    if (result.affected === 0) {
+      throw new NotFoundException(`Post with ${PostId} not found`);
+    }
+    return { success: true, message: 'Post successfully deleted' };
   }
 }

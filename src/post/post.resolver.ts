@@ -1,9 +1,10 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { PostService } from './post.service';
 import { Post } from './entities/post.entity';
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { UserInput } from 'src/user/dto/user.input';
+import { DeleteResponse } from './type/delete-response.type';
 // import { UseGuards } from '@nestjs/common';
 // import { GqlAuthGuard } from 'src/auth/guards/gql-auth.guard';
 
@@ -26,17 +27,35 @@ export class PostResolver {
   }
 
   @Query(() => Post, { name: 'findOnePost' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.postService.findOne(id);
+  findOne(
+    @Args('PostId', { type: () => ID }) PostId: string,
+    @Args('user') user: UserInput,
+  ) {
+    return this.postService.findOne(PostId, user);
   }
 
   @Mutation(() => Post)
-  updatePost(@Args('updatePostInput') updatePostInput: UpdatePostInput) {
-    return this.postService.update(updatePostInput.id, updatePostInput);
+  updatePost(
+    @Args('PostId', { type: () => ID }) PostId: string,
+    @Args('updatePostInput') updatePostInput: UpdatePostInput,
+    @Args('user') user: UserInput,
+  ) {
+    return this.postService.updatePost(PostId, updatePostInput, user);
   }
 
-  // @Mutation(() => Post)
-  // removePost(@Args('id', { type: () => Int }) id: number) {
-  //   return this.postService.remove(id);
-  // }
+  @Mutation(() => Post)
+  updatePostLikes(
+    @Args('PostId', { type: () => ID }) PostId: string,
+    @Args('user') user: UserInput,
+  ) {
+    return this.postService.updatePostLikes(PostId, user);
+  }
+
+  @Mutation(() => DeleteResponse)
+  removePost(
+    @Args('PostId', { type: () => ID }) PostId: string,
+    @Args('user') user: UserInput,
+  ): Promise<DeleteResponse> {
+    return this.postService.remove(PostId, user);
+  }
 }
