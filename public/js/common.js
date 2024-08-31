@@ -1,8 +1,10 @@
-$('#postTextarea').keyup((event) => {
+$('#postTextarea, #replyTextarea').keyup((event) => {
   var textbox = $(event.target);
   var value = textbox.val().trim();
 
-  var submitButton = $('#submitPostButton');
+  var isModal = textbox.parents('.modal').length == 1;
+
+  var submitButton = isModal ? $('#submitReplyButton') : $('#submitPostButton');
 
   if (submitButton.length == 0) return alert('No submit button found');
 
@@ -14,22 +16,47 @@ $('#postTextarea').keyup((event) => {
   submitButton.prop('disabled', false);
 });
 
-$('#submitPostButton').click(() => {
+$('#submitPostButton, #submitReplyButton').click(() => {
   var button = $(event.target);
-  var textbox = $('#postTextarea');
+
+  var isModal = button.parents('.modal').length == 1;
+  var textbox = isModal ? $('#replyTextarea') : $('#postTextarea');
 
   var data = {
     Content: textbox.val(),
   };
 
+  if (isModal) {
+    var id = button.data().id;
+    if (id == null) return alert('Button id is null');
+    data.ReplyTo = id;
+  }
+
   $.post('/post/api', data, (postData) => {
-    console.log(postData);
-    var html = createPostHtml(postData);
-    $('.postsContainer').prepend(html);
-    textbox.val('');
-    button.prop('disabled', true);
+    if (postData.ReplyTo) {
+      location.reload();
+    } else {
+      var html = createPostHtml(postData);
+      $('.postsContainer').prepend(html);
+      textbox.val('');
+      button.prop('disabled', true);
+    }
   });
 });
+
+$('#replyModal').on('show.bs.modal', (event) => {
+  var button = $(event.relatedTarget);
+  var postId = getPostIdFromElement(button);
+  $('#submitReplyButton').data('id', postId);
+
+  $.get('/post/api/' + postId, (results) => {
+    outputPosts(results, $('#originalPostContainer'));
+  });
+});
+
+$('#replyModal').on('hidden.bs.modal', () =>
+  $('#originalPostContainer').html(''),
+);
 
 $(document).on('click', '.likeButton', (event) => {
   var button = $(event.target);
@@ -41,7 +68,6 @@ $(document).on('click', '.likeButton', (event) => {
     url: `/post/api/${postId}/like`,
     type: 'PUT',
     success: (postData) => {
-      console.log(postData);
       button.find('span').text(postData.LikedBy.length || '');
 
       if (
@@ -65,7 +91,6 @@ $(document).on('click', '.retweetButton', (event) => {
     url: `/post/api/${postId}/retweet`,
     type: 'POST',
     success: (postData) => {
-      console.log(postData);
       button.find('span').text(postData.RetweetUsers?.length || '');
 
       if (
@@ -81,6 +106,15 @@ $(document).on('click', '.retweetButton', (event) => {
   });
 });
 
+$(document).on('click', '.post', (event) => {
+  var element = $(event.target);
+  var postId = getPostIdFromElement(element);
+
+  if (postId !== undefined && !element.is('button')) {
+    window.location.href = '/post/' + postId;
+  }
+});
+
 function getPostIdFromElement(element) {
   var isRoot = element.hasClass('post');
   var rootElement = isRoot == true ? element : element.closest('.post');
@@ -91,10 +125,12 @@ function getPostIdFromElement(element) {
   return postId;
 }
 
-function createPostHtml(postData) {
+function createPostHtml(postData, largeFont = false) {
   if (postData == null) return alert('post object is null');
+
   var isRetweet = postData.OriginalPost !== null;
   var retweetedBy = isRetweet ? postData.PostedBy.Username : null;
+
   postData = isRetweet ? postData.OriginalPost : postData;
 
   var postedBy = postData.PostedBy;
@@ -120,6 +156,7 @@ function createPostHtml(postData) {
   )
     ? 'active'
     : '';
+  var largeFontClass = largeFont ? 'largeFont' : '';
 
   var retweetText = '';
   if (isRetweet) {
@@ -129,7 +166,21 @@ function createPostHtml(postData) {
                   </span>`;
   }
 
-  return `<div class='post' data-id='${postData.PostId}'>
+  var replyFlag = '';
+  if (postData.ReplyTo) {
+    if (!postData.ReplyTo.PostId) {
+      return alert('Reply to is not populated');
+    } else if (!postData.ReplyTo.PostedBy.UserId) {
+      return alert('Posted by is not populated');
+    }
+
+    var replyToUsername = postData.ReplyTo.PostedBy.Username;
+    replyFlag = `<div class='replyFlag'>
+                        Replying to <a href='/profile/${replyToUsername}'>@${replyToUsername}<a>
+                    </div>`;
+  }
+
+  return `<div class='post ${largeFontClass}' data-id='${postData.PostId}'>
               <div class='postActionContainer'>
                   ${retweetText}
               </div>
@@ -143,13 +194,14 @@ function createPostHtml(postData) {
                           <span class='username'>@${postedBy.Username}</span>
                           <span class='date'>${timestamp}</span>
                       </div>
+                      ${replyFlag}
                       <div class='postBody'>
                           <span>${postData.Content}</span>
                       </div>
                       <div class='postFooter'>
                           <div class='postButtonContainer'>
-                              <button>
-                                  <i class='far fa-comment'></i>
+                              <button data-toggle='modal' data-target='#replyModal'>
+                                    <i class='far fa-comment'></i>
                               </button>
                           </div>
                           <div class='postButtonContainer green'>
@@ -205,4 +257,39 @@ function timeDifference(current, previous) {
   } else {
     return Math.round(elapsed / msPerYear) + ' years ago';
   }
+}
+
+function outputPosts(results, container) {
+  container.html('');
+
+  if (!Array.isArray(results)) {
+    results = [results];
+  }
+
+  results.forEach((result) => {
+    var html = createPostHtml(result);
+    container.append(html);
+  });
+
+  if (results.length == 0) {
+    container.append("<span class='noResults'>Nothing to show.</span>");
+  }
+}
+
+function outputPostsWithReplies(results, container) {
+  console.log(results);
+  container.html('');
+  console.log(results);
+  if (results.ReplyTo !== null && results.ReplyTo.PostId !== undefined) {
+    var html = createPostHtml(results.ReplyTo);
+    container.append(html);
+  }
+
+  var mainPostHtml = createPostHtml(results, true);
+  container.append(mainPostHtml);
+
+  results.Replies.forEach((result) => {
+    var html = createPostHtml(result);
+    container.append(html);
+  });
 }

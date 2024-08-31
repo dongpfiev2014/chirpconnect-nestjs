@@ -30,6 +30,9 @@ export const CREATE_POST_MUTATION = gql`
       RetweetedPosts {
         PostId
       }
+      ReplyTo {
+        PostId
+      }
     }
   }
 `;
@@ -98,6 +101,16 @@ export const FIND_ALL_POSTS_QUERY = gql`
         CreatedAt
         UpdatedAt
       }
+      ReplyTo {
+        PostId
+        Content
+        PostedBy {
+          UserId
+          FirstName
+          LastName
+          Username
+        }
+      }
     }
   }
 `;
@@ -125,6 +138,99 @@ export const FIND_ONE_POST_QUERY = gql`
         FirstName
         LastName
         Username
+      }
+      OriginalPost {
+        PostId
+        Content
+        Pinned
+        CreatedAt
+        UpdatedAt
+        PostedBy {
+          UserId
+          FirstName
+          LastName
+          Username
+          Email
+          ProfilePic
+        }
+        RetweetUsers {
+          UserId
+        }
+        LikedBy {
+          UserId
+        }
+      }
+      RetweetUsers {
+        UserId
+        FirstName
+        LastName
+        Username
+        Email
+        ProfilePic
+      }
+      RetweetedPosts {
+        PostId
+        Content
+        Pinned
+        CreatedAt
+        UpdatedAt
+      }
+      ReplyTo {
+        PostId
+        Content
+        CreatedAt
+        UpdatedAt
+        PostedBy {
+          UserId
+          FirstName
+          LastName
+          Username
+          ProfilePic
+        }
+        RetweetUsers {
+          UserId
+        }
+        LikedBy {
+          UserId
+        }
+        OriginalPost {
+          PostId
+        }
+      }
+      Replies {
+        PostId
+        Content
+        CreatedAt
+        UpdatedAt
+        PostedBy {
+          UserId
+          FirstName
+          LastName
+          Username
+          ProfilePic
+        }
+        OriginalPost {
+          PostId
+        }
+        ReplyTo {
+          PostId
+          Content
+          CreatedAt
+          UpdatedAt
+          PostedBy {
+            UserId
+            FirstName
+            LastName
+            Username
+            ProfilePic
+          }
+        }
+        RetweetUsers {
+          UserId
+        }
+        LikedBy {
+          UserId
+        }
       }
     }
   }

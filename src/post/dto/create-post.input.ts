@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
 @InputType()
 export class CreatePostInput {
@@ -13,4 +13,9 @@ export class CreatePostInput {
   })
   @IsOptional()
   Pinned?: boolean;
+
+  @Field({ nullable: true })
+  @IsUUID()
+  @IsOptional()
+  ReplyTo?: string;
 }

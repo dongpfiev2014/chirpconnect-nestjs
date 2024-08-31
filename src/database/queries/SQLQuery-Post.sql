@@ -5,6 +5,7 @@ SELECT TOP (1000) [PostId]
       ,[UpdatedAt]
       ,[PostedBy]
 	  ,[OriginalPost]
+	  ,[ReplyTo]
   FROM [dbo].[Post]
 
 

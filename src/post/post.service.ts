@@ -24,9 +24,19 @@ export class PostService {
     user: UserInput,
   ): Promise<Post> {
     try {
+      let replyToPost: Post = null;
+      if (createPostInput.ReplyTo) {
+        replyToPost = await this.postRepository.findOne({
+          where: { PostId: createPostInput.ReplyTo },
+        });
+        if (!replyToPost) {
+          throw new BadRequestException('Reply post not found');
+        }
+      }
       const newPost = this.postRepository.create({
         ...createPostInput,
         PostedBy: user,
+        ReplyTo: replyToPost,
       });
       return await this.postRepository.save(newPost);
     } catch (error) {
@@ -45,6 +55,8 @@ export class PostService {
         'OriginalPost.PostedBy',
         'OriginalPost.RetweetUsers',
         'OriginalPost.LikedBy',
+        'ReplyTo',
+        'ReplyTo.PostedBy',
       ],
       order: { CreatedAt: 'DESC' },
     });
@@ -54,7 +66,20 @@ export class PostService {
   async findOne(PostId: string, user: UserInput): Promise<Post> {
     const found = await this.postRepository.findOne({
       where: { PostId, PostedBy: user },
-      relations: ['PostedBy', 'LikedBy'],
+      relations: [
+        'PostedBy',
+        'LikedBy',
+        'RetweetUsers',
+        'ReplyTo',
+        'ReplyTo.LikedBy',
+        'ReplyTo.RetweetUsers',
+        'ReplyTo.PostedBy',
+        'Replies',
+        'Replies.LikedBy',
+        'Replies.RetweetUsers',
+        'Replies.PostedBy',
+        'Replies.ReplyTo.PostedBy',
+      ],
     });
 
     if (!found) {

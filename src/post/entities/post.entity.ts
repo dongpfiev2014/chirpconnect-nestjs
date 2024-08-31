@@ -55,6 +55,19 @@ export class Post {
   @OneToMany(() => Post, (post) => post.OriginalPost)
   RetweetedPosts: Post[];
 
+  @Field(() => Post, { nullable: true, defaultValue: null })
+  @ManyToOne(() => Post, (post) => post.Replies, {
+    nullable: true,
+    cascade: true,
+  })
+  @JoinColumn({ name: 'ReplyTo' })
+  @Index()
+  ReplyTo?: Post;
+
+  @Field(() => [Post], { defaultValue: [] })
+  @OneToMany(() => Post, (post) => post.ReplyTo)
+  Replies: Post[];
+
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   CreatedAt: Date;

@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Render,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -39,6 +40,7 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @Post('/api')
   async createPost(@Req() req) {
+    console.log(req.body);
     const payload = req.body as CreatePostInput;
     if (payload.Content === '' || !payload.Content) {
       throw new BadRequestException('Invalid data');
@@ -81,8 +83,7 @@ export class PostController {
         FIND_ONE_POST_QUERY,
         { PostId, user: req.user },
       );
-      console.log(post);
-      return post;
+      return post.findOnePost;
     } catch (error) {
       return {
         errorMessage: error.message,
@@ -175,6 +176,21 @@ export class PostController {
         errorMessage: error.message,
       };
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:PostId')
+  @Render('postPage')
+  async dynamicPost(
+    @Param('PostId') PostId: string,
+    @CurrentUser() user: User,
+  ) {
+    return {
+      pageTitle: 'View post',
+      userLoggedIn: user,
+      userLoggedInJs: JSON.stringify(user),
+      postId: PostId,
+    };
   }
 
   // @UseGuards(JwtAuthGuard)
