@@ -6,6 +6,10 @@
   --spacing: 15px;
   --greyText: rgb(101, 119, 134);
   --greyButtonText: rgba(0, 0, 0, 0.34);
+  --red: rgb(226, 34, 94);
+  --redBackground: rgba(226, 34, 94, 0.1);
+  --green: rgb(23, 191, 99);
+  --greenBackground: rgba(23, 191, 99, 0.1);
 }
 
 * {
@@ -14,6 +18,7 @@
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 a:hover {
@@ -59,6 +64,11 @@ button {
   background-color: transparent;
   border: none;
   color: var(--greyButtonText);
+}
+
+button i,
+button span {
+  pointer-events: none;
 }
 
 .mainSectionContainer {
@@ -181,4 +191,29 @@ button {
   background-color: #d4edff;
   color: var(--blue);
   border-radius: 50%;
+}
+
+.postButtonContainer.red button.active {
+  color: var(--red);
+}
+
+.postButtonContainer.red button:hover {
+  color: var(--red);
+  background-color: var(--redBackground);
+}
+
+.postButtonContainer.green button.active {
+  color: var(--green);
+}
+
+.postButtonContainer.green button:hover {
+  color: var(--green);
+  background-color: var(--greenBackground);
+}
+
+.postActionContainer {
+  padding-left: 35px;
+  font-size: 13px;
+  color: var(--greyText);
+  margin-bottom: 5px;
 }

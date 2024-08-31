@@ -50,6 +50,13 @@ export class PostResolver {
   ) {
     return this.postService.updatePostLikes(PostId, user);
   }
+  @Mutation(() => Post)
+  updateRetweet(
+    @Args('PostId', { type: () => ID }) PostId: string,
+    @Args('user') user: UserInput,
+  ) {
+    return this.postService.updateRetweet(PostId, user);
+  }
 
   @Mutation(() => DeleteResponse)
   removePost(

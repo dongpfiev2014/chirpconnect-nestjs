@@ -31,30 +31,115 @@ $('#submitPostButton').click(() => {
   });
 });
 
+$(document).on('click', '.likeButton', (event) => {
+  var button = $(event.target);
+  var postId = getPostIdFromElement(button);
+
+  if (postId === undefined) return;
+
+  $.ajax({
+    url: `/post/api/${postId}/like`,
+    type: 'PUT',
+    success: (postData) => {
+      console.log(postData);
+      button.find('span').text(postData.LikedBy.length || '');
+
+      if (
+        postData.LikedBy?.some((user) => user.UserId === userLoggedIn.UserId)
+      ) {
+        button.addClass('active');
+      } else {
+        button.removeClass('active');
+      }
+    },
+  });
+});
+
+$(document).on('click', '.retweetButton', (event) => {
+  var button = $(event.target);
+  var postId = getPostIdFromElement(button);
+
+  if (postId === undefined) return;
+
+  $.ajax({
+    url: `/post/api/${postId}/retweet`,
+    type: 'POST',
+    success: (postData) => {
+      console.log(postData);
+      button.find('span').text(postData.RetweetUsers?.length || '');
+
+      if (
+        postData.RetweetUsers?.some(
+          (user) => user.UserId === userLoggedIn.UserId,
+        )
+      ) {
+        button.addClass('active');
+      } else {
+        button.removeClass('active');
+      }
+    },
+  });
+});
+
+function getPostIdFromElement(element) {
+  var isRoot = element.hasClass('post');
+  var rootElement = isRoot == true ? element : element.closest('.post');
+  var postId = rootElement.data().id;
+
+  if (postId === undefined) return alert('Post id undefined');
+
+  return postId;
+}
+
 function createPostHtml(postData) {
+  if (postData == null) return alert('post object is null');
+  var isRetweet = postData.OriginalPost !== null;
+  var retweetedBy = isRetweet ? postData.PostedBy.Username : null;
+  postData = isRetweet ? postData.OriginalPost : postData;
+
   var postedBy = postData.PostedBy;
 
-  if (postedBy.UserId === undefined) {
+  if (postedBy?.UserId === undefined) {
     return console.log('User object not populated');
   }
 
   var displayName = postedBy.FirstName + ' ' + postedBy.LastName;
 
   var timezoneOffsetInHours = getTimezoneOffsetInHours();
-  var localCreatedAt = addHoursToUTC(
-    postData.CreatedAt,
-    timezoneOffsetInHours,
-  ).toISOString();
+  var localCreatedAt = addHoursToUTC(postData.CreatedAt, timezoneOffsetInHours);
   var timestamp = timeDifference(new Date(), new Date(localCreatedAt));
 
-  return `<div class='post'>
+  var likeButtonActiveClass = postData.LikedBy?.some(
+    (user) => user.UserId === userLoggedIn.UserId,
+  )
+    ? 'active'
+    : '';
+
+  var retweetButtonActiveClass = postData.RetweetUsers?.some(
+    (user) => user.UserId === userLoggedIn.UserId,
+  )
+    ? 'active'
+    : '';
+
+  var retweetText = '';
+  if (isRetweet) {
+    retweetText = `<span>
+                      <i class='fas fa-retweet'></i>
+                      Retweeted by <a href='/profile/${retweetedBy}'>@${retweetedBy}</a>    
+                  </span>`;
+  }
+
+  return `<div class='post' data-id='${postData.PostId}'>
+              <div class='postActionContainer'>
+                  ${retweetText}
+              </div>
               <div class='mainContentContainer'>
                   <div class='userImageContainer'>
                       <img src='${postedBy.ProfilePic}'>
                   </div>
                   <div class='postContentContainer'>
                       <div class='header'>
-                          <a href='/profile/${postedBy.username}' class='displayName'>${displayName}</a>
+                          <a href='/profile/${postedBy.Username}' class='displayName'>${displayName}</a>
                           <span class='username'>@${postedBy.Username}</span>
                           <span class='date'>${timestamp}</span>
                       </div>
@@ -67,14 +152,16 @@ function createPostHtml(postData) {
                                   <i class='far fa-comment'></i>
                               </button>
                           </div>
-                          <div class='postButtonContainer'>
-                              <button>
+                          <div class='postButtonContainer green'>
+                              <button class='retweetButton ${retweetButtonActiveClass}'>
                                   <i class='fas fa-retweet'></i>
+                                  <span>${postData.RetweetUsers?.length || ''}</span>
                               </button>
                           </div>
-                          <div class='postButtonContainer'>
-                              <button>
+                          <div class='postButtonContainer red'>
+                              <button class='likeButton ${likeButtonActiveClass}'>
                                   <i class='far fa-heart'></i>
+                                  <span>${postData.LikedBy?.length || ''}</span>
                               </button>
                           </div>
                       </div>

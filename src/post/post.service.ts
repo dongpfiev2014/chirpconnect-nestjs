@@ -6,8 +6,8 @@ import {
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { Post } from './entities/post.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { UserInput } from 'src/user/dto/user.input';
 import { DeleteResponse } from './type/delete-response.type';
 import { User } from 'src/user/entities/user.entity';
@@ -17,6 +17,7 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectEntityManager() private entityManager: EntityManager,
   ) {}
   async create(
     createPostInput: CreatePostInput,
@@ -36,7 +37,15 @@ export class PostService {
   async findAll(user: UserInput): Promise<Post[]> {
     const posts = this.postRepository.find({
       where: { PostedBy: user },
-      relations: ['PostedBy'],
+      relations: [
+        'PostedBy',
+        'LikedBy',
+        'RetweetUsers',
+        'OriginalPost',
+        'OriginalPost.PostedBy',
+        'OriginalPost.RetweetUsers',
+        'OriginalPost.LikedBy',
+      ],
       order: { CreatedAt: 'DESC' },
     });
     return posts;
@@ -66,32 +75,60 @@ export class PostService {
   }
 
   async updatePostLikes(PostId: string, user: UserInput) {
-    const post = await this.postRepository.findOne({
-      where: { PostId },
-      relations: ['LikedBy'],
-    });
-    const userEntity = await this.userRepository.findOne({
-      where: { UserId: user.UserId },
-    });
+    return this.entityManager.transaction(async (manager) => {
+      const [post, userEntity] = await Promise.all([
+        manager.findOne(Post, { where: { PostId }, relations: ['LikedBy'] }),
+        manager.findOne(User, { where: { UserId: user.UserId } }),
+      ]);
 
-    if (!post) {
-      throw new NotFoundException(`Post with ${PostId} not found`);
-    }
-    // Check if user already liked the post
-    const hasLiked = post.LikedBy.some(
-      (likedUser) => likedUser.UserId === user.UserId,
-    );
+      if (!post) {
+        throw new NotFoundException(`Post with ${PostId} not found`);
+      }
 
-    if (hasLiked) {
-      // Remove user from the likes array
-      post.LikedBy = post.LikedBy.filter(
-        (likedUser) => likedUser.UserId !== user.UserId,
+      const hasLiked = post.LikedBy.some(
+        (likedUser) => likedUser.UserId === user.UserId,
       );
-    } else {
-      // Add user to the likes array
-      post.LikedBy.push(userEntity);
-    }
-    return await this.postRepository.save(post);
+
+      post.LikedBy = hasLiked
+        ? post.LikedBy.filter((likedUser) => likedUser.UserId !== user.UserId)
+        : [...post.LikedBy, userEntity];
+
+      return await manager.save(post);
+    });
+  }
+
+  async updateRetweet(PostId: string, user: UserInput) {
+    return this.entityManager.transaction(async (manager) => {
+      const [existingUser, OriginalPost] = await Promise.all([
+        manager.findOne(User, { where: { UserId: user.UserId } }),
+        manager.findOne(Post, {
+          where: { PostId },
+          relations: ['RetweetUsers', 'RetweetedPosts'],
+        }),
+      ]);
+
+      const deletedPost = await manager.delete(Post, {
+        OriginalPost: { PostId },
+        PostedBy: existingUser,
+      });
+
+      if (deletedPost.affected === 0) {
+        const repost = manager.create(Post, {
+          PostedBy: existingUser,
+          OriginalPost: OriginalPost,
+        });
+
+        const savedRepost = await manager.save(repost);
+        OriginalPost.RetweetedPosts.push(savedRepost);
+        OriginalPost.RetweetUsers.push(existingUser);
+        return await manager.save(OriginalPost);
+      } else {
+        OriginalPost.RetweetUsers = OriginalPost.RetweetUsers.filter(
+          (user) => user.UserId !== existingUser.UserId,
+        );
+        return await manager.save(OriginalPost);
+      }
+    });
   }
 
   async remove(PostId: string, user: UserInput): Promise<DeleteResponse> {

@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -16,10 +18,11 @@ import {
 export class Post {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn('uuid')
+  @Index()
   PostId: string;
 
-  @Field()
-  @Column({ type: 'nvarchar', length: 255, nullable: false })
+  @Field({ defaultValue: '' })
+  @Column({ type: 'nvarchar', length: 255, nullable: true, default: '' })
   Content: string;
 
   @Field(() => User)
@@ -31,9 +34,26 @@ export class Post {
   @Column({ type: 'bit', default: false })
   Pinned: boolean;
 
-  @Field(() => [User])
+  @Field(() => [User], { defaultValue: [] })
   @ManyToMany(() => User, (user) => user.LikedPosts)
   LikedBy: User[];
+
+  @Field(() => [User], { defaultValue: [] })
+  @ManyToMany(() => User, (user) => user.RetweetPosts)
+  RetweetUsers: User[];
+
+  @Field(() => Post, { nullable: true, defaultValue: null })
+  @ManyToOne(() => Post, (post) => post.RetweetedPosts, {
+    nullable: true,
+    cascade: true,
+  })
+  @JoinColumn({ name: 'OriginalPost' })
+  @Index()
+  OriginalPost?: Post;
+
+  @Field(() => [Post], { defaultValue: [] })
+  @OneToMany(() => Post, (post) => post.OriginalPost)
+  RetweetedPosts: Post[];
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })

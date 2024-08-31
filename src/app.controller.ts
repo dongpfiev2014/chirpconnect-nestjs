@@ -19,8 +19,9 @@ export class AppController {
   @Render('home')
   root(@Req() req) {
     return {
-      userLoggedIn: req.user,
       pageTitle: 'Home',
+      userLoggedIn: req.user,
+      userLoggedInJs: JSON.stringify(req.user),
     };
   }
 }

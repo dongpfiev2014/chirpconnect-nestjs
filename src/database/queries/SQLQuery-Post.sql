@@ -4,7 +4,8 @@ SELECT TOP (1000) [PostId]
       ,[CreatedAt]
       ,[UpdatedAt]
       ,[PostedBy]
+	  ,[OriginalPost]
   FROM [dbo].[Post]
 
 
-  DELETE FROM [dbo].[Post] WHERE PostId = 'F4C8037D-3766-EF11-BDFD-6045BD1DF899'
+DELETE FROM [dbo].[Post] WHERE PostId = '5474AF90-9767-EF11-BDFD-6045BD1DF899'

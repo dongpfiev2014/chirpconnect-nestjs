@@ -19,6 +19,7 @@ import {
   FIND_ONE_POST_QUERY,
   UPDATE_POST_LIKES_MUTATION,
   UPDATE_POST_MUTATION,
+  UPDATE_RETWEET_MUTATION,
 } from 'src/graphql/queries/post.queries';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
 import { ApolloClient } from '@apollo/client/core';
@@ -136,11 +137,9 @@ export class PostController {
   @Put('/api/:PostId/like')
   async updatePostLikes(
     @Param('PostId') PostId: string,
-    @Body() updatePostInput: UpdatePostInput,
     @CurrentUser() user: User,
   ) {
     try {
-      console.log(PostId, updatePostInput, user);
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_POST_LIKES_MUTATION,
         {
@@ -148,11 +147,35 @@ export class PostController {
           user,
         },
       );
-      return updatedPost;
+      return updatedPost.updatePostLikes;
     } catch (error) {
       return {
         errorMessage: error.message,
       };
     }
   }
+  @UseGuards(JwtAuthGuard)
+  @Post('/api/:PostId/retweet')
+  async updateRetweet(
+    @Param('PostId') PostId: string,
+    @CurrentUser() user: User,
+  ) {
+    try {
+      console.log(PostId, user);
+      const updatedPost = await this.graphqlService.mutateData<any>(
+        UPDATE_RETWEET_MUTATION,
+        {
+          PostId,
+          user,
+        },
+      );
+      return updatedPost.updateRetweet;
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
+  }
+
+  // @UseGuards(JwtAuthGuard)
 }

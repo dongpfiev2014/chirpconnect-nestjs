@@ -18,6 +18,18 @@ export const CREATE_POST_MUTATION = gql`
         CreatedAt
         UpdatedAt
       }
+      LikedBy {
+        UserId
+      }
+      OriginalPost {
+        PostId
+      }
+      RetweetUsers {
+        UserId
+      }
+      RetweetedPosts {
+        PostId
+      }
     }
   }
 `;
@@ -37,6 +49,52 @@ export const FIND_ALL_POSTS_QUERY = gql`
         Username
         Email
         ProfilePic
+        CreatedAt
+        UpdatedAt
+      }
+      LikedBy {
+        UserId
+        FirstName
+        LastName
+        Username
+        Email
+        ProfilePic
+        CreatedAt
+        UpdatedAt
+      }
+      OriginalPost {
+        PostId
+        Content
+        Pinned
+        CreatedAt
+        UpdatedAt
+        PostedBy {
+          UserId
+          FirstName
+          LastName
+          Username
+          Email
+          ProfilePic
+        }
+        RetweetUsers {
+          UserId
+        }
+        LikedBy {
+          UserId
+        }
+      }
+      RetweetUsers {
+        UserId
+        FirstName
+        LastName
+        Username
+        Email
+        ProfilePic
+      }
+      RetweetedPosts {
+        PostId
+        Content
+        Pinned
         CreatedAt
         UpdatedAt
       }
@@ -108,6 +166,21 @@ export const UPDATE_POST_LIKES_MUTATION = gql`
       LikedBy {
         UserId
         Username
+      }
+    }
+  }
+`;
+
+export const UPDATE_RETWEET_MUTATION = gql`
+  mutation UpdateRetweet($PostId: ID!, $user: UserInput!) {
+    updateRetweet(PostId: $PostId, user: $user) {
+      PostId
+      Content
+      Pinned
+      CreatedAt
+      UpdatedAt
+      RetweetUsers {
+        UserId
       }
     }
   }

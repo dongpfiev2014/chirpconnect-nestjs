@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -18,6 +19,7 @@ import {
 export class User {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn('uuid')
+  @Index()
   UserId: string;
 
   @Field()
@@ -59,6 +61,11 @@ export class User {
   @ManyToMany(() => Post, (post) => post.LikedBy)
   @JoinTable()
   LikedPosts: Post[];
+
+  @Field(() => [Post])
+  @ManyToMany(() => Post, (post) => post.RetweetUsers)
+  @JoinTable()
+  RetweetPosts: Post[];
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
