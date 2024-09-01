@@ -22,8 +22,11 @@ export class PostResolver {
   }
 
   @Query(() => [Post], { name: 'findAllPosts' })
-  findAll(@Args('user') user: UserInput) {
-    return this.postService.findAll(user);
+  findAll(
+    @Args('UserId', { type: () => ID, nullable: true }) UserId?: string,
+    @Args('isReply', { nullable: true }) isReply?: boolean,
+  ) {
+    return this.postService.findAll(UserId, isReply);
   }
 
   @Query(() => Post, { name: 'findOnePost' })

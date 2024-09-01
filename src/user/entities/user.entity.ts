@@ -67,6 +67,19 @@ export class User {
   @JoinTable()
   RetweetPosts: Post[];
 
+  @Field(() => [User])
+  @ManyToMany(() => User, (user) => user.Followers)
+  @JoinTable({
+    name: 'User_Following',
+    joinColumn: { name: 'UserId', referencedColumnName: 'UserId' },
+    inverseJoinColumn: { name: 'FollowingId', referencedColumnName: 'UserId' },
+  })
+  Following: User[];
+
+  @Field(() => [User])
+  @ManyToMany(() => User, (user) => user.Following)
+  Followers: User[];
+
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   CreatedAt: Date;

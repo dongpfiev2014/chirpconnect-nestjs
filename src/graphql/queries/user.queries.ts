@@ -30,3 +30,18 @@ export const FIND_ALL_USERS_QUERY = gql`
     }
   }
 `;
+
+export const FIND_USER_QUERY = gql`
+  query FindProfile($Username: String!, $user: UserInput!) {
+    findProfile(Username: $Username, user: $user) {
+      UserId
+      FirstName
+      LastName
+      Username
+      Email
+      ProfilePic
+      CreatedAt
+      UpdatedAt
+    }
+  }
+`;

@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { UserInput } from './dto/user.input';
 
 @Injectable()
 export class UserService {
@@ -114,6 +115,24 @@ export class UserService {
       throw new UnauthorizedException('Credentials are not valid');
     }
     return user;
+  }
+
+  async findProfile(Username: string, _user: UserInput): Promise<User> {
+    let found: User;
+    try {
+      found = await this.userRepository.findOne({
+        where: { Username },
+        // relations: [
+        //   'Posts',
+        //   'Posts.LikedBy',
+        //   'Posts.RetweetUsers',
+        //   'Posts.ReplyTo',
+        // ],
+      });
+      return found;
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   async testRedis() {

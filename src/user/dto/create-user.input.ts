@@ -5,6 +5,7 @@ import {
   IsString,
   IsStrongPassword,
   Length,
+  Matches,
 } from 'class-validator';
 
 @InputType()
@@ -22,6 +23,7 @@ export class CreateUserInput {
   @Field()
   @IsString()
   @Length(1, 32)
+  @Matches(/^\S*$/, { message: 'Username should not contain spaces' })
   Username: string;
 
   @Field()

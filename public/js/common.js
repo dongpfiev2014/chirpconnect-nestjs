@@ -58,6 +58,44 @@ $('#replyModal').on('hidden.bs.modal', () =>
   $('#originalPostContainer').html(''),
 );
 
+$('#deletePostModal').on('show.bs.modal', (event) => {
+  console.log(event);
+  var button = $(event.relatedTarget);
+  var postId = getPostIdFromElement(button);
+  $('#deletePostButton').data('id', postId);
+});
+
+$('#deletePostButton').click((event) => {
+  console.log(event);
+  var postId = $(event.target).data('id');
+
+  $.ajax({
+    url: `/post/api/${postId}`,
+    type: 'DELETE',
+    success: (data, status, xhr) => {
+      console.log(xhr);
+      if (xhr.responseJSON.errorMessage) {
+        toastr.error('Could not delete post !!', 'Alert', {
+          closeButton: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          timeOut: '5000',
+        });
+        return;
+      }
+      toastr.success('Post deleted successfully', 'Success', {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: '1000',
+      });
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    },
+  });
+});
+
 $(document).on('click', '.likeButton', (event) => {
   var button = $(event.target);
   var postId = getPostIdFromElement(button);
@@ -113,6 +151,39 @@ $(document).on('click', '.post', (event) => {
   if (postId !== undefined && !element.is('button')) {
     window.location.href = '/post/' + postId;
   }
+});
+
+$(document).on('click', '.followButton', (e) => {
+  var button = $(e.target);
+  var userId = button.data().user;
+
+  $.ajax({
+    url: `/user/api/${userId}/follow`,
+    type: 'PUT',
+    success: (data, status, xhr) => {
+      if (xhr.status == 404) {
+        alert('user not found');
+        return;
+      }
+
+      var difference = 1;
+      if (data.following && data.following.includes(userId)) {
+        button.addClass('following');
+        button.text('Following');
+      } else {
+        button.removeClass('following');
+        button.text('Follow');
+        difference = -1;
+      }
+
+      var followersLabel = $('#followersValue');
+      if (followersLabel.length != 0) {
+        var followersText = followersLabel.text();
+        followersText = parseInt(followersText);
+        followersLabel.text(followersText + difference);
+      }
+    },
+  });
 });
 
 function getPostIdFromElement(element) {
@@ -180,6 +251,11 @@ function createPostHtml(postData, largeFont = false) {
                     </div>`;
   }
 
+  var buttons = '';
+  if (postData.PostedBy.UserId == userLoggedIn.UserId) {
+    buttons = `<button data-id='${postData.PostId}' data-toggle='modal' data-target='#deletePostModal'><i class='fas fa-times'></i></button>`;
+  }
+
   return `<div class='post ${largeFontClass}' data-id='${postData.PostId}'>
               <div class='postActionContainer'>
                   ${retweetText}
@@ -190,9 +266,12 @@ function createPostHtml(postData, largeFont = false) {
                   </div>
                   <div class='postContentContainer'>
                       <div class='header'>
+                        <div>
                           <a href='/profile/${postedBy.Username}' class='displayName'>${displayName}</a>
                           <span class='username'>@${postedBy.Username}</span>
                           <span class='date'>${timestamp}</span>
+                        </div>
+                        ${buttons}
                       </div>
                       ${replyFlag}
                       <div class='postBody'>
@@ -201,7 +280,7 @@ function createPostHtml(postData, largeFont = false) {
                       <div class='postFooter'>
                           <div class='postButtonContainer'>
                               <button data-toggle='modal' data-target='#replyModal'>
-                                    <i class='far fa-comment'></i>
+                                <i class='far fa-comment'></i>
                               </button>
                           </div>
                           <div class='postButtonContainer green'>
@@ -276,6 +355,7 @@ function outputPosts(results, container) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function outputPostsWithReplies(results, container) {
   console.log(results);
   container.html('');

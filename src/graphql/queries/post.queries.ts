@@ -38,8 +38,8 @@ export const CREATE_POST_MUTATION = gql`
 `;
 
 export const FIND_ALL_POSTS_QUERY = gql`
-  query FindAllPosts($user: UserInput!) {
-    findAllPosts(user: $user) {
+  query FindAllPosts($UserId: ID, $isReply: Boolean) {
+    findAllPosts(UserId: $UserId, isReply: $isReply) {
       PostId
       Content
       Pinned

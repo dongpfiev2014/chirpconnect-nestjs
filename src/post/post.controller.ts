@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Render,
   Req,
   UseGuards,
@@ -61,11 +62,19 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/api')
-  async getPosts(@Req() req) {
+  async getPosts(@Query() query: { postedBy?: string; isReply?: string }) {
     try {
+      if (query.isReply !== undefined) {
+        const isReply = query.isReply == 'true';
+        const posts = await this.graphqlService.fetchData<any>(
+          FIND_ALL_POSTS_QUERY,
+          { UserId: query.postedBy, isReply },
+        );
+        return posts.findAllPosts;
+      }
       const posts = await this.graphqlService.fetchData<any>(
         FIND_ALL_POSTS_QUERY,
-        { user: req.user },
+        { UserId: null, isReply: null },
       );
       return posts.findAllPosts;
     } catch (error) {
@@ -84,25 +93,6 @@ export class PostController {
         { PostId, user: req.user },
       );
       return post.findOnePost;
-    } catch (error) {
-      return {
-        errorMessage: error.message,
-      };
-    }
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete('/api/:PostId')
-  async deletePost(@Param('PostId') PostId: string, @Req() req) {
-    try {
-      const deletedPost = await this.graphqlService.mutateData<any>(
-        DELETE_POST_MUTATION,
-        {
-          PostId,
-          user: req.user,
-        },
-      );
-      return deletedPost;
     } catch (error) {
       return {
         errorMessage: error.message,
@@ -193,5 +183,22 @@ export class PostController {
     };
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Delete('/api/:PostId')
+  async deletePost(@Param('PostId') PostId: string, @Req() req) {
+    try {
+      const deletedPost = await this.graphqlService.mutateData<any>(
+        DELETE_POST_MUTATION,
+        {
+          PostId,
+          user: req.user,
+        },
+      );
+      return deletedPost;
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
+  }
 }

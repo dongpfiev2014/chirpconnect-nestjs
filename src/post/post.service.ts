@@ -6,7 +6,7 @@ import {
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { Post } from './entities/post.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, IsNull, Not, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { UserInput } from 'src/user/dto/user.input';
 import { DeleteResponse } from './type/delete-response.type';
@@ -44,28 +44,36 @@ export class PostService {
     }
   }
 
-  async findAll(user: UserInput): Promise<Post[]> {
+  async findAll(UserId?: string, isReply?: boolean): Promise<Post[]> {
+    console.log(UserId, isReply);
+    const relations = [
+      'PostedBy',
+      'LikedBy',
+      'RetweetUsers',
+      'OriginalPost',
+      'OriginalPost.PostedBy',
+      'OriginalPost.RetweetUsers',
+      'OriginalPost.LikedBy',
+      'ReplyTo',
+      'ReplyTo.PostedBy',
+    ];
+
+    const whereCondition: any = { PostedBy: { UserId } };
+
+    if (isReply !== undefined && isReply !== null) {
+      whereCondition.ReplyTo = isReply ? Not(IsNull()) : IsNull();
+    }
     const posts = this.postRepository.find({
-      where: { PostedBy: user },
-      relations: [
-        'PostedBy',
-        'LikedBy',
-        'RetweetUsers',
-        'OriginalPost',
-        'OriginalPost.PostedBy',
-        'OriginalPost.RetweetUsers',
-        'OriginalPost.LikedBy',
-        'ReplyTo',
-        'ReplyTo.PostedBy',
-      ],
+      where: whereCondition,
+      relations: relations,
       order: { CreatedAt: 'DESC' },
     });
     return posts;
   }
 
-  async findOne(PostId: string, user: UserInput): Promise<Post> {
+  async findOne(PostId: string, _user: UserInput): Promise<Post> {
     const found = await this.postRepository.findOne({
-      where: { PostId, PostedBy: user },
+      where: { PostId },
       relations: [
         'PostedBy',
         'LikedBy',

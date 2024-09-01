@@ -1,0 +1,44 @@
+extends layouts/main-layout.pug
+
+block content
+    if !profileUser
+        span.errorMessage Check the url you are trying to access
+    else  
+        script.
+            var profileUserId = '!{profileUser.UserId}';
+            var profileUser = '!{profileUser}';
+            var selectedTab = '!{selectedTab}';
+            
+        .profileHeaderContainer
+            .coverPhotoContainer
+
+                .userImageContainer
+                    img(src=profileUser.ProfilePic, alt="User profile image")
+            .profileButtonsContainer
+                if profileUser.UserId != userLoggedIn.UserId
+                    a.profileButton(href=`/messages/${profileUser.UserId}`)
+                        i.fas.fa-envelope
+                    +createFollowButton(profileUser, false)
+            .userDetailsContainer
+                span.displayName #{profileUser.FirstName} #{profileUser.LastName}
+                span.username @#{profileUser.Username}
+                span.description #{profileUser.Description}
+
+                .followersContainer
+                    a(href=`/profile/${profileUser.Username}/following`)
+                        span.value #{0}
+                        span Following
+                    a(href=`/profile/${profileUser.Username}/followers`)
+                        span.value #{0}
+                        span Followers
+        .tabsContainer
+            +createTab("Posts", `/profile/${profileUser.Username}`, selectedTab != "replies")
+            +createTab("Replies", `/profile/${profileUser.Username}/replies`, selectedTab == "replies")
+
+
+        .postsContainer
+
+        +createPostModals(userLoggedIn)
+
+block scripts
+    script(src="/js/profile.js")
