@@ -27,13 +27,19 @@ export const FIND_ALL_USERS_QUERY = gql`
       ProfilePic
       CreatedAt
       UpdatedAt
+      Following {
+        UserId
+      }
+      Followers {
+        UserId
+      }
     }
   }
 `;
 
 export const FIND_USER_QUERY = gql`
-  query FindProfile($Username: String!, $user: UserInput!) {
-    findProfile(Username: $Username, user: $user) {
+  query FindProfile($Username: String!) {
+    findProfile(Username: $Username) {
       UserId
       FirstName
       LastName
@@ -42,6 +48,33 @@ export const FIND_USER_QUERY = gql`
       ProfilePic
       CreatedAt
       UpdatedAt
+      Following {
+        UserId
+      }
+      Followers {
+        UserId
+      }
+    }
+  }
+`;
+
+export const FOLLOW_USER_MUTATION = gql`
+  mutation FollowUser($ProfileId: ID!, $UserId: ID!) {
+    followUser(ProfileId: $ProfileId, UserId: $UserId) {
+      UserId
+      FirstName
+      LastName
+      Username
+      Email
+      ProfilePic
+      CreatedAt
+      UpdatedAt
+      Following {
+        UserId
+      }
+      Followers {
+        UserId
+      }
     }
   }
 `;

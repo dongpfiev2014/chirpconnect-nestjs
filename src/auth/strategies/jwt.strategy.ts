@@ -37,6 +37,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ProfilePic: user.ProfilePic,
       CreatedAt: user.CreatedAt,
       UpdatedAt: user.UpdatedAt,
+      Followers: user.Followers,
+      Following: user.Following,
     };
   }
 }

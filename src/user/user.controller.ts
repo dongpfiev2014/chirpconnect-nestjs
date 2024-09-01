@@ -4,6 +4,7 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
 import { User } from './entities/user.entity';
+import { FOLLOW_USER_MUTATION } from 'src/graphql/queries/user.queries';
 
 @Controller('user')
 export class UserController {
@@ -15,14 +16,21 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('/api/:UserId/follow')
-  async followUser(@Param('UserId') UserId: string, @CurrentUser() user: User) {
-    console.log(UserId, user);
-    return {
-      pageTitle: user.Username,
-      userLoggedIn: user,
-      userLoggedInJs: JSON.stringify(user),
-      profileUser: user,
-    };
+  @Put('/api/:ProfileId/follow')
+  async followUser(
+    @Param('ProfileId') ProfileId: string,
+    @CurrentUser() user: User,
+  ) {
+    try {
+      const result = await this.graphqlService.mutateData<any>(
+        FOLLOW_USER_MUTATION,
+        { ProfileId, UserId: user.UserId },
+      );
+      return result.followUser;
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
   }
 }

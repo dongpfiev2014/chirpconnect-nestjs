@@ -161,13 +161,22 @@ $(document).on('click', '.followButton', (e) => {
     url: `/user/api/${userId}/follow`,
     type: 'PUT',
     success: (data, status, xhr) => {
-      if (xhr.status == 404) {
-        alert('user not found');
+      console.log(data);
+      if (xhr.status !== 200) {
+        toastr.error('User not found !!', 'Alert', {
+          closeButton: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          timeOut: '5000',
+        });
         return;
       }
 
       var difference = 1;
-      if (data.following && data.following.includes(userId)) {
+      if (
+        data.Following.length > 0 &&
+        data.Following.some((follower) => follower.UserId === userId)
+      ) {
         button.addClass('following');
         button.text('Following');
       } else {

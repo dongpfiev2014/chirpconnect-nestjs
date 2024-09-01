@@ -43,8 +43,9 @@ export class ProfileController {
     try {
       const profile = await this.graphqlService.fetchData<any>(
         FIND_USER_QUERY,
-        { Username, user },
+        { Username },
       );
+
       return {
         pageTitle: profile.Username,
         userLoggedIn: user,
@@ -71,7 +72,7 @@ export class ProfileController {
     try {
       const profile = await this.graphqlService.fetchData<any>(
         FIND_USER_QUERY,
-        { Username, user },
+        { Username },
       );
       return {
         pageTitle: profile.Username,
@@ -88,5 +89,37 @@ export class ProfileController {
         errorMessage: error.message,
       };
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:Username/following')
+  @Render('followersAndFollowing')
+  async renderFollowing(
+    @Param('Username') Username: string,
+    @CurrentUser() user: User,
+  ) {
+    return {
+      pageTitle: 'Bịp cmm',
+      userLoggedIn: user,
+      userLoggedInJs: JSON.stringify(user),
+      profileUser: Username,
+      selectedTab: 'following',
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:Username/followers')
+  @Render('followersAndFollowing')
+  async renderFollowers(
+    @Param('Username') Username: string,
+    @CurrentUser() user: User,
+  ) {
+    return {
+      pageTitle: 'Bịp vcl',
+      userLoggedIn: user,
+      userLoggedInJs: JSON.stringify(user),
+      profileUser: Username,
+      selectedTab: 'followers',
+    };
   }
 }

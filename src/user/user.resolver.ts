@@ -7,7 +7,6 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards/gql-auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { TokenPayload } from 'src/auth/token-payload.interface';
-import { UserInput } from './dto/user.input';
 
 @Resolver((_of) => User)
 export class UserResolver {
@@ -52,11 +51,16 @@ export class UserResolver {
   }
 
   @Query(() => User, { name: 'findProfile' })
-  findProfile(
-    @Args('Username', { type: () => String }) Username: string,
-    @Args('user') user: UserInput,
+  findProfile(@Args('Username', { type: () => String }) Username: string) {
+    return this.userService.findProfile(Username);
+  }
+
+  @Mutation(() => User)
+  followUser(
+    @Args('ProfileId', { type: () => ID }) ProfileId: string,
+    @Args('UserId', { type: () => ID }) UserId: string,
   ) {
-    return this.userService.findProfile(Username, user);
+    return this.userService.followUser(ProfileId, UserId);
   }
 
   @Query(() => String)

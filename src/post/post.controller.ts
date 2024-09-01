@@ -41,16 +41,15 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @Post('/api')
   async createPost(@Req() req) {
-    console.log(req.body);
     const payload = req.body as CreatePostInput;
     if (payload.Content === '' || !payload.Content) {
       throw new BadRequestException('Invalid data');
     }
-
+    const { Followers, Following, ...userInput } = req.user;
     try {
       const newPost = await this.graphqlService.mutateData<any>(
         CREATE_POST_MUTATION,
-        { createPostInput: payload, user: req.user },
+        { createPostInput: payload, user: userInput },
       );
       return newPost.createPost;
     } catch (error) {
@@ -88,9 +87,11 @@ export class PostController {
   @Get('/api/:PostId')
   async getOnePost(@Param('PostId') PostId: string, @Req() req) {
     try {
+      const { Followers, Following, ...userInput } = req.user;
+
       const post = await this.graphqlService.fetchData<any>(
         FIND_ONE_POST_QUERY,
-        { PostId, user: req.user },
+        { PostId, user: userInput },
       );
       return post.findOnePost;
     } catch (error) {
@@ -108,13 +109,13 @@ export class PostController {
     @CurrentUser() user: User,
   ) {
     try {
-      console.log(PostId, updatePostInput, user);
+      const { Followers, Following, ...userInput } = user;
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_POST_MUTATION,
         {
           PostId,
           updatePostInput,
-          user,
+          user: userInput,
         },
       );
       return updatedPost;
@@ -130,12 +131,13 @@ export class PostController {
     @Param('PostId') PostId: string,
     @CurrentUser() user: User,
   ) {
+    const { Followers, Following, ...userInput } = user;
     try {
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_POST_LIKES_MUTATION,
         {
           PostId,
-          user,
+          user: userInput,
         },
       );
       return updatedPost.updatePostLikes;
@@ -152,12 +154,12 @@ export class PostController {
     @CurrentUser() user: User,
   ) {
     try {
-      console.log(PostId, user);
+      const { Followers, Following, ...userInput } = user;
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_RETWEET_MUTATION,
         {
           PostId,
-          user,
+          user: userInput,
         },
       );
       return updatedPost.updateRetweet;
@@ -187,11 +189,12 @@ export class PostController {
   @Delete('/api/:PostId')
   async deletePost(@Param('PostId') PostId: string, @Req() req) {
     try {
+      const { Followers, Following, ...userInput } = req.user;
       const deletedPost = await this.graphqlService.mutateData<any>(
         DELETE_POST_MUTATION,
         {
           PostId,
-          user: req.user,
+          user: userInput,
         },
       );
       return deletedPost;

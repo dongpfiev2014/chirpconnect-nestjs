@@ -8,19 +8,19 @@ import {
 } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { UserInput } from './dto/user.input';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @InjectEntityManager() private entityManager: EntityManager,
   ) {}
 
   private async hashedPassword(Password: string) {
@@ -76,7 +76,7 @@ export class UserService {
     try {
       found = await this.userRepository.findOne({
         where: { UserId },
-        relations: ['Posts', 'LikedPosts'],
+        relations: ['Posts', 'LikedPosts', 'Following', 'Followers'],
       });
       return found;
     } catch (error) {
@@ -117,22 +117,48 @@ export class UserService {
     return user;
   }
 
-  async findProfile(Username: string, _user: UserInput): Promise<User> {
+  async findProfile(Username: string): Promise<User> {
     let found: User;
     try {
       found = await this.userRepository.findOne({
         where: { Username },
-        // relations: [
-        //   'Posts',
-        //   'Posts.LikedBy',
-        //   'Posts.RetweetUsers',
-        //   'Posts.ReplyTo',
-        // ],
+        relations: ['Following', 'Followers'],
       });
       return found;
     } catch (error) {
       throw new NotFoundException('User not found');
     }
+  }
+
+  async followUser(ProfileId: string, UserId: string) {
+    return this.entityManager.transaction(async (manager) => {
+      const [targetUser, existingUser] = await Promise.all([
+        manager.findOne(User, {
+          where: { UserId: ProfileId },
+        }),
+        manager.findOne(User, {
+          where: { UserId },
+          relations: ['Following', 'Followers'],
+        }),
+      ]);
+      if (!targetUser) {
+        throw new NotFoundException('User not found');
+      }
+      const isFollowed = existingUser.Following.some(
+        (follower) => follower.UserId === ProfileId,
+      );
+
+      if (!isFollowed) {
+        existingUser.Following.push(targetUser);
+      } else {
+        existingUser.Following = existingUser.Following.filter(
+          (follower) => follower.UserId !== ProfileId,
+        );
+      }
+      await manager.save(existingUser);
+
+      return existingUser;
+    });
   }
 
   async testRedis() {
