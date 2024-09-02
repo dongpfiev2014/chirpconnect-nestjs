@@ -16,8 +16,12 @@ block content
             .mainContentContainer
                 .loadingSpinnerContainer
                     img(src="/images/loadingSpinner.gif", alt="Loading spinner")
-                .chatContainer(style="visibility: hidden")
+                .chatContainer(style="visibility: hidden", data-room=chat._id)
                     ul.chatMessages
+
+                    .typingDots
+                        img(src="/images/dots.gif", alt="Typing dots")
+
                     .footer
                         textarea.inputTextbox(name="messageInput", placeholder="Type a message...")
                         button.sendMessageButton
@@ -25,4 +29,4 @@ block content
         +createChatNameModal(chat)
 
 block scripts
-    script(src="/js/chatPage.js")
+    script(src="/js/chatPage.js", defer)

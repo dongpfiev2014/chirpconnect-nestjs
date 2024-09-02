@@ -21,6 +21,10 @@ body {
   font-weight: 300;
 }
 
+ul {
+  margin: 0;
+}
+
 * {
   outline: none !important;
 }
@@ -57,10 +61,14 @@ nav a {
   align-items: center;
   justify-content: center;
   color: #212529;
+  position: relative;
 }
 
 nav a.blue {
-  color: var(--blue);
+  background: linear-gradient(45deg, #11ca8c, #6fbde4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
 }
 
 nav a:hover {
@@ -672,14 +680,24 @@ button span {
   display: flex;
   align-items: flex-end;
   flex-shrink: 0;
-  -webkit-flex: 0;
 }
 
+.typingDots img,
 .chatMessages .message .messageBody {
   background-color: #f1f0f0;
   padding: 6px 12px;
   border-radius: 18px;
   font-size: 14px;
+}
+
+.typingDots img {
+  height: 35px;
+}
+
+.typingDots {
+  padding: var(--spacing);
+  padding-bottom: 0;
+  display: none;
 }
 
 .chatMessages .message .messageContainer {
@@ -769,4 +787,49 @@ button span {
 .loadingSpinnerContainer img {
   width: 50%;
   max-width: 75px;
+}
+
+.resultListItem.active {
+  background-color: var(--blueBackground);
+}
+
+.resultListItem.notification * {
+  pointer-events: none;
+}
+
+#notificationBadge,
+#messagesBadge {
+  background-color: var(--red);
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+}
+
+#notificationBadge.active,
+#messagesBadge.active {
+  visibility: visible;
+}
+
+#notificationList {
+  position: fixed;
+  top: 5px;
+  right: 5px;
+  width: 350px;
+  background-color: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+#notificationList .active {
+  background-color: white;
 }

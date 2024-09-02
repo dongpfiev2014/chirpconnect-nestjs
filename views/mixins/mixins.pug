@@ -41,6 +41,8 @@ mixin createDeletePostModal()
 mixin createPostModals(userLoggedIn)
     +createReplyModal(userLoggedIn)
     +createDeletePostModal()
+    +createPinnedPostModal()
+    +createUnpinPostModal()
 
 mixin createFollowButton(user, isFollowing)
     - text = isFollowing ? "Following" : "Follow"
@@ -58,8 +60,7 @@ mixin createImageUploadModal()
             .modal-content
                 .modal-header
                     h5#imageUploadModalLabel.modal-title Upload a new profile picture
-                    button.close(type='button', data-dismiss='modal', aria-label='Close')
-                    span(aria-hidden='true') &times;
+                    button.btn.btn-close(type='button', data-dismiss='modal', aria-label='Close')
                 .modal-body
                     input#filePhoto(type="file", name="filePhoto")
 
@@ -75,8 +76,7 @@ mixin createCoverPhotoUploadModal()
             .modal-content
                 .modal-header
                     h5#coverPhotoModalLabel.modal-title Upload a new cover photo
-                    button.close(type='button', data-dismiss='modal', aria-label='Close')
-                    span(aria-hidden='true') &times;
+                    button.btn.btn-close(type='button', data-dismiss='modal', aria-label='Close')
                 .modal-body
                     input#coverPhoto(type="file", name="filePhoto")
 
@@ -92,8 +92,7 @@ mixin createPinnedPostModal()
             .modal-content
                 .modal-header
                     h5#confirmPinModalLabel.modal-title Pin this post?
-                    button.close(type='button', data-dismiss='modal', aria-label='Close')
-                    span(aria-hidden='true') &times;
+                    button.btn.btn-close(type='button', data-dismiss='modal', aria-label='Close')
                 .modal-body
                     p This post will appear at the top of your profile. You can only pin one post.
                 .modal-footer
@@ -106,8 +105,7 @@ mixin createUnpinPostModal()
             .modal-content
                 .modal-header
                     h5#unpinModalLabel.modal-title Unpin the post?
-                    button.close(type='button', data-dismiss='modal', aria-label='Close')
-                    span(aria-hidden='true') &times;
+                    button.btn.btn-close(type='button', data-dismiss='modal', aria-label='Close')
                 .modal-body
                     p This post will be unpinned.
                 .modal-footer
@@ -143,8 +141,7 @@ mixin createChatNameModal(chat)
             .modal-content
                 .modal-header
                     h5#chatNameModalLabel.modal-title Change the chat name
-                    button.close(type='button', data-dismiss='modal', aria-label='Close')
-                    span(aria-hidden='true') &times;
+                    button.btn.btn-close(type='button', data-dismiss='modal', aria-label='Close')
                 .modal-body
                     input#chatNameTextbox(type="text", placeholder="Enter a name for this chat", value=chat.chatName)
                 .modal-footer
