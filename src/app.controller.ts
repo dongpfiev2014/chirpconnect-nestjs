@@ -1,20 +1,31 @@
-import { Controller, Get, Render, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Render,
+  Req,
+  UseGuards,
+  // UseInterceptors,
+} from '@nestjs/common';
 import { AppService } from './app.service';
-import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import {} from // CacheInterceptor,
+// CacheKey,
+// CacheTTL,
+'@nestjs/cache-manager';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Controller('')
+@UseGuards(JwtAuthGuard)
+// @UseInterceptors(CacheInterceptor)
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Get('HelloWorld')
-  @CacheKey(`user_${123456}_HelloWorld_key`)
-  @CacheTTL(60000)
-  async getHello() {
-    return this.appService.getHello();
-  }
-  @UseGuards(JwtAuthGuard)
+  // @Get('HelloWorld')
+  // @CacheKey(`user_${123456}_HelloWorld_key`)
+  // @CacheTTL(60000)
+  // async getHello() {
+  //   return this.appService.getHello();
+  // }
+
   @Get('')
   @Render('home')
   root(@Req() req) {

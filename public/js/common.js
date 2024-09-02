@@ -1,3 +1,7 @@
+var cropper;
+var timer;
+var selectedUsers = [];
+
 $('#postTextarea, #replyTextarea').keyup((event) => {
   var textbox = $(event.target);
   var value = textbox.val().trim();
@@ -65,8 +69,19 @@ $('#deletePostModal').on('show.bs.modal', (event) => {
   $('#deletePostButton').data('id', postId);
 });
 
+$('#confirmPinModal').on('show.bs.modal', (event) => {
+  var button = $(event.relatedTarget);
+  var postId = getPostIdFromElement(button);
+  $('#pinPostButton').data('id', postId);
+});
+
+$('#unpinModal').on('show.bs.modal', (event) => {
+  var button = $(event.relatedTarget);
+  var postId = getPostIdFromElement(button);
+  $('#unpinPostButton').data('id', postId);
+});
+
 $('#deletePostButton').click((event) => {
-  console.log(event);
   var postId = $(event.target).data('id');
 
   $.ajax({
@@ -93,6 +108,169 @@ $('#deletePostButton').click((event) => {
         location.reload();
       }, 1000);
     },
+  });
+});
+
+$('#pinPostButton').click((event) => {
+  var postId = $(event.target).data('id');
+
+  $.ajax({
+    url: `/api/posts/${postId}`,
+    type: 'PUT',
+    data: { pinned: true },
+    success: (data, status, xhr) => {
+      if (xhr.status != 204) {
+        alert('could not delete post');
+        return;
+      }
+
+      location.reload();
+    },
+  });
+});
+
+$('#unpinPostButton').click((event) => {
+  var postId = $(event.target).data('id');
+
+  $.ajax({
+    url: `/api/posts/${postId}`,
+    type: 'PUT',
+    data: { pinned: false },
+    success: (data, status, xhr) => {
+      if (xhr.status != 204) {
+        alert('could not delete post');
+        return;
+      }
+
+      location.reload();
+    },
+  });
+});
+
+$('#filePhoto').change(function () {
+  if (this.files && this.files[0]) {
+    var reader = new FileReader();
+    reader.onload = (e) => {
+      var image = document.getElementById('imagePreview');
+      image.src = e.target.result;
+
+      if (cropper !== undefined) {
+        cropper.destroy();
+      }
+
+      cropper = new Cropper(image, {
+        aspectRatio: 1 / 1,
+        background: false,
+      });
+    };
+    reader.readAsDataURL(this.files[0]);
+  } else {
+    console.log('nope');
+  }
+});
+
+$('#coverPhoto').change(function () {
+  if (this.files && this.files[0]) {
+    var reader = new FileReader();
+    reader.onload = (e) => {
+      var image = document.getElementById('coverPreview');
+      image.src = e.target.result;
+
+      if (cropper !== undefined) {
+        cropper.destroy();
+      }
+
+      cropper = new Cropper(image, {
+        aspectRatio: 16 / 9,
+        background: false,
+      });
+    };
+    reader.readAsDataURL(this.files[0]);
+  }
+});
+
+$('#imageUploadButton').click(() => {
+  var canvas = cropper.getCroppedCanvas();
+
+  if (canvas == null) {
+    alert('Could not upload image. Make sure it is an image file.');
+    return;
+  }
+
+  canvas.toBlob((blob) => {
+    var formData = new FormData();
+    formData.append('croppedImage', blob);
+
+    $.ajax({
+      url: '/api/users/profilePicture',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: () => location.reload(),
+    });
+  });
+});
+
+$('#coverPhotoButton').click(() => {
+  var canvas = cropper.getCroppedCanvas();
+
+  if (canvas == null) {
+    alert('Could not upload image. Make sure it is an image file.');
+    return;
+  }
+
+  canvas.toBlob((blob) => {
+    var formData = new FormData();
+    formData.append('croppedImage', blob);
+
+    $.ajax({
+      url: '/api/users/coverPhoto',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: () => location.reload(),
+    });
+  });
+});
+
+$('#userSearchTextbox').keydown((event) => {
+  clearTimeout(timer);
+  var textbox = $(event.target);
+  var value = textbox.val();
+
+  if (value == '' && (event.which == 8 || event.keyCode == 8)) {
+    // remove user from selection
+    selectedUsers.pop();
+    updateSelectedUsersHtml();
+    $('.resultsContainer').html('');
+
+    if (selectedUsers.length == 0) {
+      $('#createChatButton').prop('disabled', true);
+    }
+
+    return;
+  }
+
+  timer = setTimeout(() => {
+    value = textbox.val().trim();
+
+    if (value == '') {
+      $('.resultsContainer').html('');
+    } else {
+      searchUsers(value);
+    }
+  }, 1000);
+});
+
+$('#createChatButton').click(() => {
+  var data = JSON.stringify(selectedUsers);
+
+  $.post('/api/chats', { users: data }, (chat) => {
+    if (!chat || !chat._id) return alert('Invalid response from server.');
+
+    window.location.href = `/messages/${chat._id}`;
   });
 });
 
@@ -261,8 +439,18 @@ function createPostHtml(postData, largeFont = false) {
   }
 
   var buttons = '';
+  var pinnedPostText = '';
   if (postData.PostedBy.UserId == userLoggedIn.UserId) {
-    buttons = `<button data-id='${postData.PostId}' data-toggle='modal' data-target='#deletePostModal'><i class='fas fa-times'></i></button>`;
+    var pinnedClass = '';
+    var dataTarget = '#confirmPinModal';
+    if (postData.pinned === true) {
+      pinnedClass = 'active';
+      dataTarget = '#unpinModal';
+      pinnedPostText =
+        "<i class='fas fa-thumbtack'></i> <span>Pinned post</span>";
+    }
+    buttons = `<button class='pinButton ${pinnedClass}' data-id="${postData._id}" data-toggle="modal" data-target="${dataTarget}"><i class='fas fa-thumbtack'></i></button>
+    <button data-id="${postData._id}" data-toggle="modal" data-target="#deletePostModal"><i class='fas fa-times'></i></button>`;
   }
 
   return `<div class='post ${largeFontClass}' data-id='${postData.PostId}'>
@@ -274,6 +462,7 @@ function createPostHtml(postData, largeFont = false) {
                       <img src='${postedBy.ProfilePic}'>
                   </div>
                   <div class='postContentContainer'>
+                      <div class='pinnedPostText'>${pinnedPostText}</div>
                       <div class='header'>
                         <div>
                           <a href='/profile/${postedBy.Username}' class='displayName'>${displayName}</a>
@@ -368,7 +557,6 @@ function outputPosts(results, container) {
 function outputPostsWithReplies(results, container) {
   console.log(results);
   container.html('');
-  console.log(results);
   if (results.ReplyTo !== null && results.ReplyTo.PostId !== undefined) {
     var html = createPostHtml(results.ReplyTo);
     container.append(html);
@@ -381,4 +569,118 @@ function outputPostsWithReplies(results, container) {
     var html = createPostHtml(result);
     container.append(html);
   });
+}
+
+function outputUsers(results, container) {
+  container.html('');
+
+  results.forEach((result) => {
+    var html = createUserHtml(result, true);
+    container.append(html);
+  });
+
+  if (results.length == 0) {
+    container.append("<span class='noResults'>No results found</span>");
+  }
+}
+
+function createUserHtml(userData, showFollowButton) {
+  var name = userData.FirstName + ' ' + userData.LastName;
+  var isFollowing =
+    userLoggedIn.Following &&
+    userLoggedIn.Following.some(
+      (follower) => follower.UserId === userData.UserId,
+    );
+  var text = isFollowing ? 'Following' : 'Follow';
+  var buttonClass = isFollowing ? 'followButton following' : 'followButton';
+
+  var followButton = '';
+  if (showFollowButton && userLoggedIn.UserId != userData.UserId) {
+    followButton = `<div class='followButtonContainer'>
+                          <button class='${buttonClass}' data-user='${userData.UserId}'>${text}</button>
+                      </div>`;
+  }
+
+  return `<div class='user'>
+              <div class='userImageContainer'>
+                  <img src='${userData.ProfilePic}'>
+              </div>
+              <div class='userDetailsContainer'>
+                  <div class='header'>
+                      <a href='/profile/${userData.Username}'>${name}</a>
+                      <span class='username'>@${userData.Username}</span>
+                  </div>
+              </div>
+              ${followButton}
+          </div>`;
+}
+
+function searchUsers(searchTerm) {
+  $.get('/api/users', { search: searchTerm }, (results) => {
+    outputSelectableUsers(results, $('.resultsContainer'));
+  });
+}
+
+function outputSelectableUsers(results, container) {
+  container.html('');
+
+  results.forEach((result) => {
+    if (
+      result._id == userLoggedIn._id ||
+      selectedUsers.some((u) => u._id == result._id)
+    ) {
+      return;
+    }
+
+    var html = createUserHtml(result, false);
+    var element = $(html);
+    element.click(() => userSelected(result));
+
+    container.append(element);
+  });
+
+  if (results.length == 0) {
+    container.append("<span class='noResults'>No results found</span>");
+  }
+}
+
+function userSelected(user) {
+  selectedUsers.push(user);
+  updateSelectedUsersHtml();
+  $('#userSearchTextbox').val('').focus();
+  $('.resultsContainer').html('');
+  $('#createChatButton').prop('disabled', false);
+}
+
+function updateSelectedUsersHtml() {
+  var elements = [];
+
+  selectedUsers.forEach((user) => {
+    var name = user.firstName + ' ' + user.lastName;
+    var userElement = $(`<span class='selectedUser'>${name}</span>`);
+    elements.push(userElement);
+  });
+
+  $('.selectedUser').remove();
+  $('#selectedUsers').prepend(elements);
+}
+
+function getChatName(chatData) {
+  var chatName = chatData.chatName;
+
+  if (!chatName) {
+    var otherChatUsers = getOtherChatUsers(chatData.users);
+    var namesArray = otherChatUsers.map(
+      (user) => user.firstName + ' ' + user.lastName,
+    );
+    chatName = namesArray.join(', ');
+  }
+
+  return chatName;
+}
+
+function getOtherChatUsers(users) {
+  if (users.length == 1) return users;
+
+  return users.filter((user) => user._id != userLoggedIn._id);
 }

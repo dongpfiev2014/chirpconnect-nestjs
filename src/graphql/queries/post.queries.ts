@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client/core';
 
 export const CREATE_POST_MUTATION = gql`
-  mutation CreatePost($createPostInput: CreatePostInput!, $user: UserInput!) {
-    createPost(createPostInput: $createPostInput, user: $user) {
+  mutation CreatePost($createPostInput: CreatePostInput!, $UserId: ID!) {
+    createPost(createPostInput: $createPostInput, UserId: $UserId) {
       PostId
       Content
       Pinned
@@ -13,10 +13,7 @@ export const CREATE_POST_MUTATION = gql`
         FirstName
         LastName
         Username
-        Email
         ProfilePic
-        CreatedAt
-        UpdatedAt
       }
       LikedBy {
         UserId
@@ -38,8 +35,12 @@ export const CREATE_POST_MUTATION = gql`
 `;
 
 export const FIND_ALL_POSTS_QUERY = gql`
-  query FindAllPosts($UserId: ID, $isReply: Boolean) {
-    findAllPosts(UserId: $UserId, isReply: $isReply) {
+  query FindAllPosts($UserId: ID, $isReply: Boolean, $followingOnly: Boolean) {
+    findAllPosts(
+      UserId: $UserId
+      isReply: $isReply
+      followingOnly: $followingOnly
+    ) {
       PostId
       Content
       Pinned
@@ -50,20 +51,10 @@ export const FIND_ALL_POSTS_QUERY = gql`
         FirstName
         LastName
         Username
-        Email
         ProfilePic
-        CreatedAt
-        UpdatedAt
       }
       LikedBy {
         UserId
-        FirstName
-        LastName
-        Username
-        Email
-        ProfilePic
-        CreatedAt
-        UpdatedAt
       }
       OriginalPost {
         PostId
@@ -76,7 +67,6 @@ export const FIND_ALL_POSTS_QUERY = gql`
           FirstName
           LastName
           Username
-          Email
           ProfilePic
         }
         RetweetUsers {
@@ -91,23 +81,12 @@ export const FIND_ALL_POSTS_QUERY = gql`
         FirstName
         LastName
         Username
-        Email
         ProfilePic
-      }
-      RetweetedPosts {
-        PostId
-        Content
-        Pinned
-        CreatedAt
-        UpdatedAt
       }
       ReplyTo {
         PostId
-        Content
         PostedBy {
           UserId
-          FirstName
-          LastName
           Username
         }
       }
@@ -116,8 +95,8 @@ export const FIND_ALL_POSTS_QUERY = gql`
 `;
 
 export const FIND_ONE_POST_QUERY = gql`
-  query FindOnePost($PostId: ID!, $user: UserInput!) {
-    findOnePost(PostId: $PostId, user: $user) {
+  query FindOnePost($PostId: ID!) {
+    findOnePost(PostId: $PostId) {
       PostId
       Content
       Pinned
@@ -128,52 +107,16 @@ export const FIND_ONE_POST_QUERY = gql`
         FirstName
         LastName
         Username
-        Email
         ProfilePic
-        CreatedAt
-        UpdatedAt
       }
       LikedBy {
         UserId
-        FirstName
-        LastName
-        Username
       }
       OriginalPost {
         PostId
-        Content
-        Pinned
-        CreatedAt
-        UpdatedAt
-        PostedBy {
-          UserId
-          FirstName
-          LastName
-          Username
-          Email
-          ProfilePic
-        }
-        RetweetUsers {
-          UserId
-        }
-        LikedBy {
-          UserId
-        }
       }
       RetweetUsers {
         UserId
-        FirstName
-        LastName
-        Username
-        Email
-        ProfilePic
-      }
-      RetweetedPosts {
-        PostId
-        Content
-        Pinned
-        CreatedAt
-        UpdatedAt
       }
       ReplyTo {
         PostId
@@ -214,15 +157,9 @@ export const FIND_ONE_POST_QUERY = gql`
         }
         ReplyTo {
           PostId
-          Content
-          CreatedAt
-          UpdatedAt
           PostedBy {
             UserId
-            FirstName
-            LastName
             Username
-            ProfilePic
           }
         }
         RetweetUsers {
@@ -237,8 +174,8 @@ export const FIND_ONE_POST_QUERY = gql`
 `;
 
 export const DELETE_POST_MUTATION = gql`
-  mutation RemovePost($PostId: ID!, $user: UserInput!) {
-    removePost(PostId: $PostId, user: $user) {
+  mutation RemovePost($PostId: ID!, $UserId: ID!) {
+    removePost(PostId: $PostId, UserId: $UserId) {
       success
       message
     }
@@ -249,12 +186,12 @@ export const UPDATE_POST_MUTATION = gql`
   mutation UpdatePost(
     $PostId: ID!
     $updatePostInput: UpdatePostInput!
-    $user: UserInput!
+    $UserId: ID!
   ) {
     updatePost(
       PostId: $PostId
       updatePostInput: $updatePostInput
-      user: $user
+      UserId: $UserId
     ) {
       PostId
       Content
@@ -266,8 +203,8 @@ export const UPDATE_POST_MUTATION = gql`
 `;
 
 export const UPDATE_POST_LIKES_MUTATION = gql`
-  mutation UpdatePostLikes($PostId: ID!, $user: UserInput!) {
-    updatePostLikes(PostId: $PostId, user: $user) {
+  mutation UpdatePostLikes($PostId: ID!, $UserId: ID!) {
+    updatePostLikes(PostId: $PostId, UserId: $UserId) {
       PostId
       LikedBy {
         UserId
@@ -278,13 +215,9 @@ export const UPDATE_POST_LIKES_MUTATION = gql`
 `;
 
 export const UPDATE_RETWEET_MUTATION = gql`
-  mutation UpdateRetweet($PostId: ID!, $user: UserInput!) {
-    updateRetweet(PostId: $PostId, user: $user) {
+  mutation UpdateRetweet($PostId: ID!, $UserId: ID!) {
+    updateRetweet(PostId: $PostId, UserId: $UserId) {
       PostId
-      Content
-      Pinned
-      CreatedAt
-      UpdatedAt
       RetweetUsers {
         UserId
       }

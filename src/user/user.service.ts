@@ -161,6 +161,26 @@ export class UserService {
     });
   }
 
+  async renderFollowingUser(UserId: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        UserId,
+      },
+      relations: ['Following'],
+    });
+    return user;
+  }
+
+  async renderFollowers(UserId: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        UserId,
+      },
+      relations: ['Followers'],
+    });
+    return user;
+  }
+
   async testRedis() {
     const test = await this.cacheManager.get('healthCheck');
     if (test) {

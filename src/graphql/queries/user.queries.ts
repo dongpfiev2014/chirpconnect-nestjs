@@ -44,10 +44,7 @@ export const FIND_USER_QUERY = gql`
       FirstName
       LastName
       Username
-      Email
       ProfilePic
-      CreatedAt
-      UpdatedAt
       Following {
         UserId
       }
@@ -62,18 +59,38 @@ export const FOLLOW_USER_MUTATION = gql`
   mutation FollowUser($ProfileId: ID!, $UserId: ID!) {
     followUser(ProfileId: $ProfileId, UserId: $UserId) {
       UserId
-      FirstName
-      LastName
-      Username
-      Email
-      ProfilePic
-      CreatedAt
-      UpdatedAt
       Following {
         UserId
       }
+    }
+  }
+`;
+
+export const GET_FOLLOWING_USER_QUERY = gql`
+  query RenderFollowingUser($UserId: ID!) {
+    renderFollowingUser(UserId: $UserId) {
+      UserId
+      Following {
+        UserId
+        FirstName
+        LastName
+        Username
+        ProfilePic
+      }
+    }
+  }
+`;
+
+export const GET_FOLLOWERS_QUERY = gql`
+  query RenderFollowers($UserId: ID!) {
+    renderFollowers(UserId: $UserId) {
+      UserId
       Followers {
         UserId
+        FirstName
+        LastName
+        Username
+        ProfilePic
       }
     }
   }

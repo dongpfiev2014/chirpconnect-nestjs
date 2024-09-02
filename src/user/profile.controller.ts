@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { TokenPayload } from 'src/auth/token-payload.interface';
 import { FIND_USER_QUERY } from 'src/graphql/queries/user.queries';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
-import { User } from 'src/user/entities/user.entity';
 
 @Controller('profile')
+@UseGuards(JwtAuthGuard)
 export class ProfileController {
   private readonly graphqlService: GraphQLService;
   constructor(
@@ -21,36 +22,63 @@ export class ProfileController {
   ) {
     this.graphqlService = new GraphQLService(apolloClient);
   }
-  @UseGuards(JwtAuthGuard)
   @Get('')
   @Render('profilePage')
-  async renderProfile(@CurrentUser() user: User) {
-    return {
-      pageTitle: user.Username,
-      userLoggedIn: user,
-      userLoggedInJs: JSON.stringify(user),
-      profileUser: user,
-    };
+  async renderProfile(@CurrentUser() user: TokenPayload) {
+    console.log(user);
+    try {
+      const profile = await this.graphqlService.fetchData<any>(
+        FIND_USER_QUERY,
+        {
+          Username: user.Username,
+        },
+      );
+      return {
+        pageTitle: profile.findProfile.Username,
+        userLoggedIn: profile.findProfile,
+        userLoggedInJs: JSON.stringify(profile.findProfile),
+        profileUser: profile.findProfile,
+      };
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/:Username')
   @Render('profilePage')
   async dynamicProfile(
     @Param('Username') Username: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
     try {
-      const profile = await this.graphqlService.fetchData<any>(
-        FIND_USER_QUERY,
-        { Username },
-      );
+      if (Username === user.Username) {
+        const profile = await this.graphqlService.fetchData<any>(
+          FIND_USER_QUERY,
+          {
+            Username: user.Username,
+          },
+        );
+        return {
+          pageTitle: profile.findProfile.Username,
+          userLoggedIn: profile.findProfile,
+          userLoggedInJs: JSON.stringify(profile.findProfile),
+          profileUser: profile.findProfile,
+        };
+      }
+      const [guest, owner] = await Promise.all([
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, { Username }),
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, {
+          Username: user.Username,
+        }),
+      ]);
 
       return {
-        pageTitle: profile.Username,
-        userLoggedIn: user,
-        userLoggedInJs: JSON.stringify(user),
-        profileUser: profile.findProfile,
+        pageTitle: guest.findProfile.Username,
+        userLoggedIn: owner.findProfile,
+        userLoggedInJs: JSON.stringify(owner.findProfile),
+        profileUser: guest.findProfile,
       };
     } catch (error) {
       return {
@@ -62,23 +90,25 @@ export class ProfileController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/:Username/replies')
   @Render('profilePage')
   async dynamicProfileReplies(
     @Param('Username') Username: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
     try {
-      const profile = await this.graphqlService.fetchData<any>(
-        FIND_USER_QUERY,
-        { Username },
-      );
+      const [guest, owner] = await Promise.all([
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, { Username }),
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, {
+          Username: user.Username,
+        }),
+      ]);
+
       return {
-        pageTitle: profile.Username,
-        userLoggedIn: user,
-        userLoggedInJs: JSON.stringify(user),
-        profileUser: profile.findProfile,
+        pageTitle: guest.findProfile.Username,
+        userLoggedIn: owner.findProfile,
+        userLoggedInJs: JSON.stringify(owner.findProfile),
+        profileUser: guest.findProfile,
         selectedTab: 'replies',
       };
     } catch (error) {
@@ -91,35 +121,64 @@ export class ProfileController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/:Username/following')
   @Render('followersAndFollowing')
   async renderFollowing(
     @Param('Username') Username: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
-    return {
-      pageTitle: 'Bịp cmm',
-      userLoggedIn: user,
-      userLoggedInJs: JSON.stringify(user),
-      profileUser: Username,
-      selectedTab: 'following',
-    };
+    try {
+      const [guest, owner] = await Promise.all([
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, { Username }),
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, {
+          Username: user.Username,
+        }),
+      ]);
+
+      return {
+        pageTitle: guest.findProfile.Username,
+        userLoggedIn: owner.findProfile,
+        userLoggedInJs: JSON.stringify(owner.findProfile),
+        profileUser: guest.findProfile,
+        selectedTab: 'following',
+      };
+    } catch (error) {
+      return {
+        pageTitle: 'User not found',
+        userLoggedIn: user,
+        userLoggedInJs: JSON.stringify(user),
+        errorMessage: error.message,
+      };
+    }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/:Username/followers')
   @Render('followersAndFollowing')
   async renderFollowers(
     @Param('Username') Username: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
-    return {
-      pageTitle: 'Bịp vcl',
-      userLoggedIn: user,
-      userLoggedInJs: JSON.stringify(user),
-      profileUser: Username,
-      selectedTab: 'followers',
-    };
+    try {
+      const [guest, owner] = await Promise.all([
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, { Username }),
+        this.graphqlService.fetchData<any>(FIND_USER_QUERY, {
+          Username: user.Username,
+        }),
+      ]);
+      return {
+        pageTitle: guest.findProfile.Username,
+        userLoggedIn: owner.findProfile,
+        userLoggedInJs: JSON.stringify(owner.findProfile),
+        profileUser: guest.findProfile,
+        selectedTab: 'followers',
+      };
+    } catch (error) {
+      return {
+        pageTitle: 'User not found',
+        userLoggedIn: user,
+        userLoggedInJs: JSON.stringify(user),
+        errorMessage: error.message,
+      };
+    }
   }
 }

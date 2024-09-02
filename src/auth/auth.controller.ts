@@ -18,6 +18,7 @@ import { ApolloClient } from '@apollo/client/core';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
 import { CREATE_USER_MUTATION } from 'src/graphql/queries/user.queries';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-authenticated.guard';
+// import { AuthenticatedGuard } from './guards/authenticated.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -28,6 +29,9 @@ export class AuthController {
   ) {
     this.graphqlService = new GraphQLService(apolloClient);
   }
+
+  // Using JWT credentials ----------------------------------------------------------------
+
   @UseGuards(RedirectIfAuthenticatedGuard)
   @Get('login')
   @Render('login')
@@ -103,4 +107,19 @@ export class AuthController {
     this.authService.logout(response);
     response.redirect('/auth/login');
   }
+
+  // Using Express-Session and caching with Redis  ----------------------------------------------------------------
+
+  // @UseGuards(AuthenticatedGuard)
+  // @Get('/protected')
+  // getHello(@Req() req) {
+  //   console.log(req.session);
+  //   return req.user;
+  // }
+
+  // @UseGuards(LocalAuthGuard)
+  // @Post('/login')
+  // login(@Req() req): any {
+  //   return { User: req.user, msg: 'User logged in' };
+  // }
 }

@@ -12,6 +12,7 @@ import {
   Render,
   Req,
   UseGuards,
+  // UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
@@ -27,10 +28,15 @@ import { GraphQLService } from 'src/graphql/service/graphql.service';
 import { ApolloClient } from '@apollo/client/core';
 import { CreatePostInput } from './dto/create-post.input';
 import { CurrentUser } from 'src/auth/current-user.decorator';
-import { User } from 'src/user/entities/user.entity';
 import { UpdatePostInput } from './dto/update-post.input';
+import { TokenPayload } from 'src/auth/token-payload.interface';
+// import { CacheInterceptor } from '@nestjs/cache-manager';
+// import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 
+// @UseInterceptors(CacheInterceptor)
 @Controller('post')
+@UseGuards(JwtAuthGuard)
+// @UseGuards(AuthenticatedGuard)
 export class PostController {
   private readonly graphqlService: GraphQLService;
   constructor(
@@ -38,18 +44,16 @@ export class PostController {
   ) {
     this.graphqlService = new GraphQLService(apolloClient);
   }
-  @UseGuards(JwtAuthGuard)
   @Post('/api')
   async createPost(@Req() req) {
     const payload = req.body as CreatePostInput;
     if (payload.Content === '' || !payload.Content) {
       throw new BadRequestException('Invalid data');
     }
-    const { Followers, Following, ...userInput } = req.user;
     try {
       const newPost = await this.graphqlService.mutateData<any>(
         CREATE_POST_MUTATION,
-        { createPostInput: payload, user: userInput },
+        { createPostInput: payload, UserId: req.user.UserId },
       );
       return newPost.createPost;
     } catch (error) {
@@ -59,9 +63,16 @@ export class PostController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/api')
-  async getPosts(@Query() query: { postedBy?: string; isReply?: string }) {
+  async getPosts(
+    @Query()
+    query: {
+      postedBy?: string;
+      isReply?: string;
+      followingOnly: string;
+    },
+    @CurrentUser() user: TokenPayload,
+  ) {
     try {
       if (query.isReply !== undefined) {
         const isReply = query.isReply == 'true';
@@ -71,11 +82,14 @@ export class PostController {
         );
         return posts.findAllPosts;
       }
-      const posts = await this.graphqlService.fetchData<any>(
-        FIND_ALL_POSTS_QUERY,
-        { UserId: null, isReply: null },
-      );
-      return posts.findAllPosts;
+      if (query.followingOnly !== undefined) {
+        const FollowingOnly = query.followingOnly == 'true';
+        const posts = await this.graphqlService.fetchData<any>(
+          FIND_ALL_POSTS_QUERY,
+          { UserId: user.UserId, isReply: null, followingOnly: FollowingOnly },
+        );
+        return posts.findAllPosts;
+      }
     } catch (error) {
       return {
         errorMessage: error.message,
@@ -83,15 +97,12 @@ export class PostController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/api/:PostId')
-  async getOnePost(@Param('PostId') PostId: string, @Req() req) {
+  async getOnePost(@Param('PostId') PostId: string) {
     try {
-      const { Followers, Following, ...userInput } = req.user;
-
       const post = await this.graphqlService.fetchData<any>(
         FIND_ONE_POST_QUERY,
-        { PostId, user: userInput },
+        { PostId },
       );
       return post.findOnePost;
     } catch (error) {
@@ -101,21 +112,19 @@ export class PostController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put('/api/:PostId/update')
   async updatePost(
     @Param('PostId') PostId: string,
     @Body() updatePostInput: UpdatePostInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
     try {
-      const { Followers, Following, ...userInput } = user;
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_POST_MUTATION,
         {
           PostId,
           updatePostInput,
-          user: userInput,
+          UserId: user.UserId,
         },
       );
       return updatedPost;
@@ -125,19 +134,20 @@ export class PostController {
       };
     }
   }
-  @UseGuards(JwtAuthGuard)
+
   @Put('/api/:PostId/like')
   async updatePostLikes(
     @Param('PostId') PostId: string,
-    @CurrentUser() user: User,
+    // @CurrentUser() user: User,
   ) {
-    const { Followers, Following, ...userInput } = user;
+    const user = 'B1B7174F-0E65-EF11-BDFD-6045BD1DF899';
+
     try {
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_POST_LIKES_MUTATION,
         {
           PostId,
-          user: userInput,
+          UserId: user,
         },
       );
       return updatedPost.updatePostLikes;
@@ -147,19 +157,18 @@ export class PostController {
       };
     }
   }
-  @UseGuards(JwtAuthGuard)
+
   @Post('/api/:PostId/retweet')
   async updateRetweet(
     @Param('PostId') PostId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
     try {
-      const { Followers, Following, ...userInput } = user;
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_RETWEET_MUTATION,
         {
           PostId,
-          user: userInput,
+          UserId: user.UserId,
         },
       );
       return updatedPost.updateRetweet;
@@ -170,12 +179,11 @@ export class PostController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/:PostId')
   @Render('postPage')
   async dynamicPost(
     @Param('PostId') PostId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() user: TokenPayload,
   ) {
     return {
       pageTitle: 'View post',
@@ -185,16 +193,17 @@ export class PostController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete('/api/:PostId')
-  async deletePost(@Param('PostId') PostId: string, @Req() req) {
+  async deletePost(
+    @Param('PostId') PostId: string,
+    @CurrentUser() user: TokenPayload,
+  ) {
     try {
-      const { Followers, Following, ...userInput } = req.user;
       const deletedPost = await this.graphqlService.mutateData<any>(
         DELETE_POST_MUTATION,
         {
           PostId,
-          user: userInput,
+          UserId: user.UserId,
         },
       );
       return deletedPost;

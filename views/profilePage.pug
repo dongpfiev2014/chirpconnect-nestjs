@@ -13,20 +13,33 @@ block content
         - followingCount = profileUser.Following.length
             
         .profileHeaderContainer
-            .coverPhotoContainer
+            .coverPhotoSection
+                .coverPhotoContainer
+                    if profileUser.coverPhoto
+                        img(src=profileUser.coverPhoto, alt="User's cover photo")
+
+                    if profileUser.UserId == userLoggedIn.UserId
+                        button.coverPhotoButton(data-toggle="modal", data-target="#coverPhotoUploadModal")
+                            i.fas.fa-camera
 
                 .userImageContainer
                     img(src=profileUser.ProfilePic, alt="User profile image")
+
+                    if profileUser.UserId == userLoggedIn.UserId
+                        button.profilePictureButton(data-toggle="modal", data-target="#imageUploadModal")
+                            i.fas.fa-camera
+
             .profileButtonsContainer
                 if profileUser.UserId != userLoggedIn.UserId
                     a.profileButton(href=`/messages/${profileUser.UserId}`)
                         i.fas.fa-envelope
 
                     - var profileUserId = profileUser.UserId.toString();
-                    - if(userLoggedIn.Following.length > 0 && userLoggedIn.Following.some(follower => follower.UserId === profileUserId))
+                    - if(userLoggedIn.Following && userLoggedIn.Following.some(follower => follower.UserId === profileUserId))
                         +createFollowButton(profileUser, true)
                     - else
                         +createFollowButton(profileUser, false)
+
             .userDetailsContainer
                 span.displayName #{profileUser.FirstName} #{profileUser.LastName}
                 span.username @#{profileUser.Username}
@@ -43,10 +56,12 @@ block content
             +createTab("Posts", `/profile/${profileUser.Username}`, selectedTab != "replies")
             +createTab("Replies", `/profile/${profileUser.Username}/replies`, selectedTab == "replies")
 
-
+        .pinnedPostContainer
         .postsContainer
 
         +createPostModals(userLoggedIn)
+        +createImageUploadModal()
+        +createCoverPhotoUploadModal()
 
 block scripts
-    script(src="/js/profile.js")
+    script(src="/js/profile.js", defer)

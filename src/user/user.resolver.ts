@@ -45,7 +45,7 @@ export class UserResolver {
   }
 
   @UseGuards(GqlAuthGuard)
-  @Query(() => User, { name: 'Me' })
+  @Query(() => User, { name: 'GetMe' })
   getMe(@CurrentUser() user: TokenPayload) {
     return user;
   }
@@ -61,6 +61,16 @@ export class UserResolver {
     @Args('UserId', { type: () => ID }) UserId: string,
   ) {
     return this.userService.followUser(ProfileId, UserId);
+  }
+
+  @Query(() => User, { name: 'renderFollowingUser' })
+  renderFollowingUser(@Args('UserId', { type: () => ID }) UserId: string) {
+    return this.userService.renderFollowingUser(UserId);
+  }
+
+  @Query(() => User, { name: 'renderFollowers' })
+  renderFollowers(@Args('UserId', { type: () => ID }) UserId: string) {
+    return this.userService.renderFollowers(UserId);
   }
 
   @Query(() => String)

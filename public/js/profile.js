@@ -17,3 +17,18 @@ function loadReplies() {
     outputPosts(results, $('.postsContainer'));
   });
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function outputPinnedPost(results, container) {
+  if (results.length == 0) {
+    container.hide();
+    return;
+  }
+
+  container.html('');
+
+  results.forEach((result) => {
+    var html = createPostHtml(result);
+    container.append(html);
+  });
+}

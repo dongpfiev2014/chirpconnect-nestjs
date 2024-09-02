@@ -6,9 +6,12 @@ import {
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { Post } from './entities/post.entity';
-import { EntityManager, IsNull, Not, Repository } from 'typeorm';
+import {
+  EntityManager,
+  //  IsNull, Not,
+  Repository,
+} from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { UserInput } from 'src/user/dto/user.input';
 import { DeleteResponse } from './type/delete-response.type';
 import { User } from 'src/user/entities/user.entity';
 
@@ -21,7 +24,7 @@ export class PostService {
   ) {}
   async create(
     createPostInput: CreatePostInput,
-    user: UserInput,
+    UserId: string,
   ): Promise<Post> {
     try {
       let replyToPost: Post = null;
@@ -33,6 +36,10 @@ export class PostService {
           throw new BadRequestException('Reply post not found');
         }
       }
+      const user = await this.userRepository.findOne({
+        where: { UserId },
+      });
+
       const newPost = this.postRepository.create({
         ...createPostInput,
         PostedBy: user,
@@ -44,34 +51,80 @@ export class PostService {
     }
   }
 
-  async findAll(UserId?: string, isReply?: boolean): Promise<Post[]> {
-    console.log(UserId, isReply);
-    const relations = [
-      'PostedBy',
-      'LikedBy',
-      'RetweetUsers',
-      'OriginalPost',
-      'OriginalPost.PostedBy',
-      'OriginalPost.RetweetUsers',
-      'OriginalPost.LikedBy',
-      'ReplyTo',
-      'ReplyTo.PostedBy',
-    ];
+  async findAll(
+    UserId?: string,
+    isReply?: boolean,
+    followingOnly?: boolean,
+  ): Promise<Post[]> {
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.PostedBy', 'PostedBy')
+      .leftJoinAndSelect('post.LikedBy', 'LikedBy')
+      .leftJoinAndSelect('post.RetweetUsers', 'RetweetUsers')
+      .leftJoinAndSelect('post.OriginalPost', 'OriginalPost')
+      .leftJoinAndSelect('post.ReplyTo', 'ReplyTo')
+      .leftJoinAndSelect('ReplyTo.PostedBy', 'ReplyToPostedBy')
+      .leftJoinAndSelect('OriginalPost.PostedBy', 'OriginalPostPostedBy')
+      .leftJoinAndSelect(
+        'OriginalPost.RetweetUsers',
+        'OriginalPostRetweetUsers',
+      )
+      .leftJoinAndSelect('OriginalPost.LikedBy', 'OriginalPostLikedBy')
+      .orderBy('post.CreatedAt', 'DESC');
 
-    const whereCondition: any = { PostedBy: { UserId } };
+    if (UserId) {
+      queryBuilder.andWhere('post.PostedBy = :UserId', { UserId });
+    }
 
     if (isReply !== undefined && isReply !== null) {
-      whereCondition.ReplyTo = isReply ? Not(IsNull()) : IsNull();
+      if (isReply) {
+        queryBuilder.andWhere('post.ReplyTo IS NOT NULL');
+      } else {
+        queryBuilder.andWhere('post.ReplyTo IS NULL');
+      }
     }
-    const posts = this.postRepository.find({
-      where: whereCondition,
-      relations: relations,
-      order: { CreatedAt: 'DESC' },
-    });
+
+    if (followingOnly !== undefined && followingOnly !== null) {
+      queryBuilder.andWhere(
+        'post.PostedBy = :UserId OR post.PostedBy IN' +
+          '(SELECT follow.FollowingId FROM User_Following follow WHERE follow.UserId = :UserId)',
+        { UserId },
+      );
+    }
+
+    const posts = await queryBuilder.getMany();
+
     return posts;
+
+    // Only find posts that relate to the user and replies
+
+    // const relations = [
+    //   'PostedBy',
+    //   'LikedBy',
+    //   'RetweetUsers',
+    //   'OriginalPost',
+    //   'OriginalPost.PostedBy',
+    //   'OriginalPost.RetweetUsers',
+    //   'OriginalPost.LikedBy',
+    //   'ReplyTo',
+    //   'ReplyTo.PostedBy',
+    // ];
+
+    // const whereCondition: any = { PostedBy: { UserId } };
+
+    // if (isReply !== undefined && isReply !== null) {
+    //   whereCondition.ReplyTo = isReply ? Not(IsNull()) : IsNull();
+    // }
+
+    // const posts = this.postRepository.find({
+    //   where: whereCondition,
+    //   relations: relations,
+    //   order: { CreatedAt: 'DESC' },
+    // });
+    // return posts;
   }
 
-  async findOne(PostId: string, _user: UserInput): Promise<Post> {
+  async findOne(PostId: string): Promise<Post> {
     const found = await this.postRepository.findOne({
       where: { PostId },
       relations: [
@@ -99,19 +152,26 @@ export class PostService {
   async updatePost(
     PostId: string,
     updatePostInput: UpdatePostInput,
-    user: UserInput,
+    UserId: string,
   ): Promise<Post> {
-    const existingPost = await this.findOne(PostId, user);
+    const existingPost = await this.postRepository.findOne({
+      where: { PostId, PostedBy: { UserId } },
+    });
+    if (!existingPost) {
+      throw new NotFoundException(
+        `Post with ${PostId} not found or not owned by the user`,
+      );
+    }
     const updatedPost = Object.assign(existingPost, updatePostInput);
     await this.postRepository.save(updatedPost);
     return updatedPost;
   }
 
-  async updatePostLikes(PostId: string, user: UserInput) {
+  async updatePostLikes(PostId: string, UserId: string) {
     return this.entityManager.transaction(async (manager) => {
       const [post, userEntity] = await Promise.all([
         manager.findOne(Post, { where: { PostId }, relations: ['LikedBy'] }),
-        manager.findOne(User, { where: { UserId: user.UserId } }),
+        manager.findOne(User, { where: { UserId } }),
       ]);
 
       if (!post) {
@@ -119,21 +179,21 @@ export class PostService {
       }
 
       const hasLiked = post.LikedBy.some(
-        (likedUser) => likedUser.UserId === user.UserId,
+        (likedUser) => likedUser.UserId === UserId,
       );
 
       post.LikedBy = hasLiked
-        ? post.LikedBy.filter((likedUser) => likedUser.UserId !== user.UserId)
+        ? post.LikedBy.filter((likedUser) => likedUser.UserId !== UserId)
         : [...post.LikedBy, userEntity];
 
       return await manager.save(post);
     });
   }
 
-  async updateRetweet(PostId: string, user: UserInput) {
+  async updateRetweet(PostId: string, UserId: string) {
     return this.entityManager.transaction(async (manager) => {
       const [existingUser, OriginalPost] = await Promise.all([
-        manager.findOne(User, { where: { UserId: user.UserId } }),
+        manager.findOne(User, { where: { UserId } }),
         manager.findOne(Post, {
           where: { PostId },
           relations: ['RetweetUsers', 'RetweetedPosts'],
@@ -164,8 +224,11 @@ export class PostService {
     });
   }
 
-  async remove(PostId: string, user: UserInput): Promise<DeleteResponse> {
-    const result = await this.postRepository.delete({ PostId, PostedBy: user });
+  async remove(PostId: string, UserId: string): Promise<DeleteResponse> {
+    const result = await this.postRepository.delete({
+      PostId,
+      PostedBy: { UserId },
+    });
     if (result.affected === 0) {
       throw new NotFoundException(`Post with ${PostId} not found`);
     }
