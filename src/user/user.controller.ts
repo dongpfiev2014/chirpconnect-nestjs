@@ -1,5 +1,14 @@
 import { ApolloClient } from '@apollo/client/core';
-import { Controller, Get, Inject, Param, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
@@ -11,6 +20,7 @@ import {
 } from 'src/graphql/queries/user.queries';
 
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   private readonly graphqlService: GraphQLService;
   constructor(
@@ -19,7 +29,6 @@ export class UserController {
     this.graphqlService = new GraphQLService(apolloClient);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put('/api/:ProfileId/follow')
   async followUser(
     @Param('ProfileId') ProfileId: string,
@@ -38,7 +47,6 @@ export class UserController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/api/:UserId/following')
   async renderFollowing(@Param('UserId') UserId: string) {
     try {
@@ -54,7 +62,6 @@ export class UserController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/api/:UserId/followers')
   async renderFollowers(@Param('UserId') UserId: string) {
     try {
@@ -69,5 +76,12 @@ export class UserController {
         errorMessage: error.message,
       };
     }
+  }
+
+  @Post('/api/profilePicture')
+  async uploadProfilePicture(@Req() req) {
+    console.log('Request :', req);
+    console.log('Fil của tôi là :', req.file);
+    return;
   }
 }

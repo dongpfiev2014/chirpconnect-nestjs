@@ -207,7 +207,7 @@ $('#imageUploadButton').click(() => {
     formData.append('croppedImage', blob);
 
     $.ajax({
-      url: '/api/users/profilePicture',
+      url: '/user/api/profilePicture',
       type: 'POST',
       data: formData,
       processData: false,
@@ -465,8 +465,8 @@ function createPostHtml(postData, largeFont = false) {
       pinnedPostText =
         "<i class='fas fa-thumbtack'></i> <span>Pinned post</span>";
     }
-    buttons = `<button class='pinButton ${pinnedClass}' data-id="${postData._id}" data-toggle="modal" data-target="${dataTarget}"><i class='fas fa-thumbtack'></i></button>
-    <button data-id="${postData._id}" data-toggle="modal" data-target="#deletePostModal"><i class='fas fa-times'></i></button>`;
+    buttons = `<button class='pinButton ${pinnedClass}' data-id="${postData.PostId}" data-toggle="modal" data-target="${dataTarget}"><i class='fas fa-thumbtack'></i></button>
+    <button data-id="${postData.PostId}" data-toggle="modal" data-target="#deletePostModal"><i class='fas fa-times'></i></button>`;
   }
 
   return `<div class='post ${largeFontClass}' data-id='${postData.PostId}'>
@@ -485,7 +485,9 @@ function createPostHtml(postData, largeFont = false) {
                           <span class='username'>@${postedBy.Username}</span>
                           <span class='date'>${timestamp}</span>
                         </div>
-                        ${buttons}
+                        <div>
+                          ${buttons}
+                        </div>
                       </div>
                       ${replyFlag}
                       <div class='postBody'>

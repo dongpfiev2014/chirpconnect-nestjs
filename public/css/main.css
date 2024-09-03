@@ -18,7 +18,10 @@ body {
   height: 100%;
   min-height: 100%;
   background-color: #fff;
-  font-weight: 300;
+  font-family: 'Source Sans 3', sans-serif;
+  font-optical-sizing: auto;
+  /* font-weight: <weight>; */
+  font-style: normal;
 }
 
 ul {
@@ -272,6 +275,7 @@ button span {
 
 .postContentContainer .header {
   display: flex;
+  justify-content: space-between;
 }
 
 .postContentContainer .header .date {
