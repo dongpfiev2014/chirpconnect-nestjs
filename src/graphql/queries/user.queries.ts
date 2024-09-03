@@ -45,6 +45,7 @@ export const FIND_USER_QUERY = gql`
       LastName
       Username
       ProfilePic
+      CoverPhoto
       Following {
         UserId
       }

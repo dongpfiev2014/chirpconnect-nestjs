@@ -14,6 +14,14 @@ import { EntityManager, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { S3Service } from 'src/common/s3/s3.service';
+import {
+  USER_UPLOAD_REGION,
+  USERS_BUCKET,
+  USERS_IMAGE_FILE_EXTENSION,
+} from './user.constants';
+import { Response } from 'express';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -21,6 +29,8 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @InjectEntityManager() private entityManager: EntityManager,
+    private authService: AuthService,
+    private readonly s3Service: S3Service,
   ) {}
 
   private async hashedPassword(Password: string) {
@@ -179,6 +189,62 @@ export class UserService {
       relations: ['Followers'],
     });
     return user;
+  }
+
+  async uploadImage(file: Buffer, UserId: string, response: Response) {
+    const timestamp = new Date().toISOString();
+    const bucket = USERS_BUCKET;
+    const key = `avatar-${UserId}-${timestamp}.${USERS_IMAGE_FILE_EXTENSION}`;
+    const region = USER_UPLOAD_REGION;
+
+    await this.s3Service.upload({
+      bucket,
+      key,
+      file,
+    });
+    const ProfilePic = this.s3Service.getObjectUrl(bucket, key, region);
+    const result = await this.userRepository
+      .createQueryBuilder()
+      .update('user')
+      .set({ ProfilePic })
+      .where('UserId = :UserId', { UserId })
+      // .output('INSERTED.UserId, INSERTED.Username, INSERTED.ProfilePic')
+      .output('INSERTED.*')
+      .execute();
+
+    const user = result.raw[0];
+    this.authService.login(user, response);
+
+    return {
+      success: true,
+      message: 'Photo changed successfully',
+    };
+  }
+
+  async uploadCoverPhoto(file: Buffer, UserId: string) {
+    const timestamp = new Date().toISOString();
+    const bucket = USERS_BUCKET;
+    const key = `coverphoto-${UserId}-${timestamp}.${USERS_IMAGE_FILE_EXTENSION}`;
+    const region = USER_UPLOAD_REGION;
+
+    await this.s3Service.upload({
+      bucket,
+      key,
+      file,
+    });
+    const CoverPhoto = this.s3Service.getObjectUrl(bucket, key, region);
+    await this.userRepository
+      .createQueryBuilder()
+      .update('user')
+      .set({ CoverPhoto })
+      .where('UserId = :UserId', { UserId })
+      // .output('INSERTED.UserId, INSERTED.Username, INSERTED.ProfilePic')
+      .execute();
+
+    return {
+      success: true,
+      message: 'Photo changed successfully',
+    };
   }
 
   async testRedis() {

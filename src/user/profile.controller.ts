@@ -25,7 +25,6 @@ export class ProfileController {
   @Get('')
   @Render('profilePage')
   async renderProfile(@CurrentUser() user: TokenPayload) {
-    console.log(user);
     try {
       const profile = await this.graphqlService.fetchData<any>(
         FIND_USER_QUERY,

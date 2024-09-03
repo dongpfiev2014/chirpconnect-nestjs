@@ -53,6 +53,20 @@ export class User {
   })
   ProfilePic: string;
 
+  @Field({
+    nullable: true,
+    defaultValue:
+      'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1725403871/images/cat.jpg',
+  })
+  @Column({
+    type: 'nvarchar',
+    length: 255,
+    nullable: true,
+    default:
+      'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1725403871/images/cat.jpg',
+  })
+  CoverPhoto: string;
+
   @Field(() => [Post])
   @OneToMany(() => Post, (post) => post.PostedBy)
   Posts: Post[];

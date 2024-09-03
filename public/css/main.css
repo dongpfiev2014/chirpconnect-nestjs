@@ -68,7 +68,7 @@ nav a {
 }
 
 nav a.blue {
-  background: linear-gradient(45deg, #11ca8c, #6fbde4);
+  background: linear-gradient(to right, #1cd6cd, #fa00d993);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-decoration: none;
@@ -280,6 +280,7 @@ button span {
 
 .postContentContainer .header .date {
   flex: 1;
+  font-size: 16px;
 }
 
 .errorMessage {
@@ -836,4 +837,8 @@ button span {
 
 #notificationList .active {
   background-color: white;
+}
+
+.imagePreviewContainer {
+  margin-top: 10px;
 }

@@ -15,7 +15,13 @@ $('#postTextarea, #replyTextarea').keyup((event) => {
 
   var submitButton = isModal ? $('#submitReplyButton') : $('#submitPostButton');
 
-  if (submitButton.length == 0) return alert('No submit button found');
+  if (submitButton.length == 0)
+    return toastr.error('No submit button found !!', 'Alert', {
+      closeButton: true,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      timeOut: '5000',
+    });
 
   if (value == '') {
     submitButton.prop('disabled', true);
@@ -37,7 +43,14 @@ $('#submitPostButton, #submitReplyButton').click(() => {
 
   if (isModal) {
     var id = button.data().id;
-    if (id == null) return alert('Button id is null');
+    if (id == null)
+      return toastr.error('Button id is null !!', 'Alert', {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: '5000',
+      });
+
     data.ReplyTo = id;
   }
 
@@ -93,7 +106,6 @@ $('#deletePostButton').click((event) => {
     url: `/post/api/${postId}`,
     type: 'DELETE',
     success: (data, status, xhr) => {
-      console.log(xhr);
       if (xhr.responseJSON.errorMessage) {
         toastr.error('Could not delete post !!', 'Alert', {
           closeButton: true,
@@ -124,8 +136,13 @@ $('#pinPostButton').click((event) => {
     type: 'PUT',
     data: { pinned: true },
     success: (data, status, xhr) => {
-      if (xhr.status != 204) {
-        alert('could not delete post');
+      if (xhr.responseJSON.errorMessage) {
+        toastr.error('Could not delete post !!', 'Alert', {
+          closeButton: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          timeOut: '5000',
+        });
         return;
       }
 
@@ -142,8 +159,13 @@ $('#unpinPostButton').click((event) => {
     type: 'PUT',
     data: { pinned: false },
     success: (data, status, xhr) => {
-      if (xhr.status != 204) {
-        alert('could not delete post');
+      if (xhr.responseJSON.errorMessage) {
+        toastr.error('Could not delete post !!', 'Alert', {
+          closeButton: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          timeOut: '5000',
+        });
         return;
       }
 
@@ -198,13 +220,32 @@ $('#imageUploadButton').click(() => {
   var canvas = cropper.getCroppedCanvas();
 
   if (canvas == null) {
-    alert('Could not upload image. Make sure it is an image file.');
+    toastr.error(
+      'Could not upload image. Make sure it is an image file.',
+      'Alert',
+      {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: '4000',
+      },
+    );
     return;
   }
+  toastr.info(
+    'Image loading in progress. Thank you for your patience.',
+    'Loading',
+    {
+      closeButton: true,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      timeOut: '4000',
+    },
+  );
 
   canvas.toBlob((blob) => {
     var formData = new FormData();
-    formData.append('croppedImage', blob);
+    formData.append('file', blob);
 
     $.ajax({
       url: '/user/api/profilePicture',
@@ -213,31 +254,75 @@ $('#imageUploadButton').click(() => {
       processData: false,
       contentType: false,
       success: () => location.reload(),
+      error: () => {
+        toastr.error(
+          'Make sure it is an image file and not exceed 10mb',
+          'Alert',
+          {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            timeOut: '4000',
+          },
+        );
+      },
     });
-  });
+  }, 'image/jpeg');
 });
 
 $('#coverPhotoButton').click(() => {
   var canvas = cropper.getCroppedCanvas();
 
   if (canvas == null) {
-    alert('Could not upload image. Make sure it is an image file.');
+    toastr.error(
+      'Could not upload image. Make sure it is an image file.',
+      'Alert',
+      {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: '4000',
+      },
+    );
     return;
   }
+  toastr.info(
+    'Image loading in progress. Thank you for your patience.',
+    'Loading',
+    {
+      closeButton: true,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      timeOut: '4000',
+    },
+  );
 
   canvas.toBlob((blob) => {
     var formData = new FormData();
-    formData.append('croppedImage', blob);
+    formData.append('file', blob);
 
     $.ajax({
-      url: '/api/users/coverPhoto',
+      url: '/user/api/coverPhoto',
       type: 'POST',
       data: formData,
       processData: false,
       contentType: false,
       success: () => location.reload(),
+      error: (x) => {
+        console.log(x);
+        toastr.error(
+          'Make sure it is an image file and not exceed 10mb',
+          'Alert',
+          {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            timeOut: '4000',
+          },
+        );
+      },
     });
-  });
+  }, 'image/jpeg');
 });
 
 $('#userSearchTextbox').keydown((event) => {
@@ -273,7 +358,13 @@ $('#createChatButton').click(() => {
   var data = JSON.stringify(selectedUsers);
 
   $.post('/api/chats', { users: data }, (chat) => {
-    if (!chat || !chat._id) return alert('Invalid response from server.');
+    if (!chat || !chat._id)
+      return toastr.error('Invalid response from server.', 'Alert', {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: '5000',
+      });
 
     window.location.href = `/messages/${chat._id}`;
   });
@@ -290,9 +381,8 @@ $(document).on('click', '.likeButton', (event) => {
     type: 'PUT',
     success: (postData) => {
       button.find('span').text(postData.LikedBy.length || '');
-
       if (
-        postData.LikedBy?.some((user) => user.UserId === userLoggedIn.UserId)
+        postData.LikedBy.some((user) => user.UserId === userLoggedIn.UserId)
       ) {
         button.addClass('active');
       } else {
@@ -312,10 +402,10 @@ $(document).on('click', '.retweetButton', (event) => {
     url: `/post/api/${postId}/retweet`,
     type: 'POST',
     success: (postData) => {
-      button.find('span').text(postData.RetweetUsers?.length || '');
+      button.find('span').text(postData.RetweetUsers.length || '');
 
       if (
-        postData.RetweetUsers?.some(
+        postData.RetweetUsers.some(
           (user) => user.UserId === userLoggedIn.UserId,
         )
       ) {
@@ -394,13 +484,25 @@ function getPostIdFromElement(element) {
   var rootElement = isRoot == true ? element : element.closest('.post');
   var postId = rootElement.data().id;
 
-  if (postId === undefined) return alert('Post id undefined');
+  if (postId === undefined)
+    return toastr.error('Post id undefined !!', 'Alert', {
+      closeButton: true,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      timeOut: '5000',
+    });
 
   return postId;
 }
 
 function createPostHtml(postData, largeFont = false) {
-  if (postData == null) return alert('post object is null');
+  if (postData == null)
+    return toastr.error('Post object is null !!', 'Alert', {
+      closeButton: true,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      timeOut: '5000',
+    });
 
   var isRetweet = postData.OriginalPost !== null;
   var retweetedBy = isRetweet ? postData.PostedBy.Username : null;
@@ -419,13 +521,12 @@ function createPostHtml(postData, largeFont = false) {
   var localCreatedAt = addHoursToUTC(postData.CreatedAt, timezoneOffsetInHours);
   var timestamp = timeDifference(new Date(), new Date(localCreatedAt));
 
-  var likeButtonActiveClass = postData.LikedBy?.some(
+  var likeButtonActiveClass = postData.LikedBy.some(
     (user) => user.UserId === userLoggedIn.UserId,
   )
     ? 'active'
     : '';
-
-  var retweetButtonActiveClass = postData.RetweetUsers?.some(
+  var retweetButtonActiveClass = postData.RetweetUsers.some(
     (user) => user.UserId === userLoggedIn.UserId,
   )
     ? 'active'
@@ -459,7 +560,7 @@ function createPostHtml(postData, largeFont = false) {
   if (postData.PostedBy.UserId == userLoggedIn.UserId) {
     var pinnedClass = '';
     var dataTarget = '#confirmPinModal';
-    if (postData.pinned === true) {
+    if (postData.Pinned === true) {
       pinnedClass = 'active';
       dataTarget = '#unpinModal';
       pinnedPostText =
@@ -502,13 +603,13 @@ function createPostHtml(postData, largeFont = false) {
                           <div class='postButtonContainer green'>
                               <button class='retweetButton ${retweetButtonActiveClass}'>
                                   <i class='fas fa-retweet'></i>
-                                  <span>${postData.RetweetUsers?.length || ''}</span>
+                                  <span>${postData.RetweetUsers.length || ''}</span>
                               </button>
                           </div>
                           <div class='postButtonContainer red'>
                               <button class='likeButton ${likeButtonActiveClass}'>
                                   <i class='far fa-heart'></i>
-                                  <span>${postData.LikedBy?.length || ''}</span>
+                                  <span>${postData.LikedBy.length || ''}</span>
                               </button>
                           </div>
                       </div>

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { UserModule } from 'src/user/user.module';
@@ -11,7 +11,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -30,5 +30,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     // SessionSerializer
   ],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,13 +1,18 @@
 import { ApolloClient } from '@apollo/client/core';
 import {
   Controller,
+  FileTypeValidator,
   Get,
   Inject,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
-  Req,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -18,6 +23,10 @@ import {
   GET_FOLLOWERS_QUERY,
   GET_FOLLOWING_USER_QUERY,
 } from 'src/graphql/queries/user.queries';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { TokenPayload } from 'src/auth/token-payload.interface';
+import { UserService } from './user.service';
+import { Response } from 'express';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
@@ -25,6 +34,7 @@ export class UserController {
   private readonly graphqlService: GraphQLService;
   constructor(
     @Inject('APOLLO_CLIENT') private readonly apolloClient: ApolloClient<any>,
+    private readonly userService: UserService,
   ) {
     this.graphqlService = new GraphQLService(apolloClient);
   }
@@ -79,9 +89,41 @@ export class UserController {
   }
 
   @Post('/api/profilePicture')
-  async uploadProfilePicture(@Req() req) {
-    console.log('Request :', req);
-    console.log('Fil của tôi là :', req.file);
-    return;
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfilePicture(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 10 * 1024 * 1024,
+          }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @CurrentUser() user: TokenPayload,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.userService.uploadImage(file.buffer, user.UserId, response);
+  }
+
+  @Post('/api/coverPhoto')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCoverPhoto(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 10 * 1024 * 1024,
+          }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @CurrentUser() user: TokenPayload,
+  ) {
+    return this.userService.uploadCoverPhoto(file.buffer, user.UserId);
   }
 }

@@ -15,15 +15,20 @@ block content
         .profileHeaderContainer
             .coverPhotoSection
                 .coverPhotoContainer
-                    if profileUser.coverPhoto
-                        img(src=profileUser.coverPhoto, alt="User's cover photo")
+                    if profileUser.CoverPhoto
+                        img(src=profileUser.CoverPhoto, alt="User's cover photo")
+                    else
+                        img(src="/images/cat-cover.jpg", alt="Default cover photo")
 
                     if profileUser.UserId == userLoggedIn.UserId
                         button.coverPhotoButton(data-toggle="modal", data-target="#coverPhotoUploadModal")
                             i.fas.fa-camera
 
                 .userImageContainer
-                    img(src=profileUser.ProfilePic, alt="User profile image")
+                    if profileUser.ProfilePic
+                        img(src=profileUser.ProfilePic, alt="User profile image")
+                    else
+                        img(src="/images/profilePic.jpeg", alt="Default profile image")
 
                     if profileUser.UserId == userLoggedIn.UserId
                         button.profilePictureButton(data-toggle="modal", data-target="#imageUploadModal")

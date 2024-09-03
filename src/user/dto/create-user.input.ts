@@ -45,4 +45,10 @@ export class CreateUserInput {
   @IsString()
   @Length(0, 255)
   ProfilePic?: string;
+
+  @Field()
+  @IsOptional()
+  @IsString()
+  @Length(0, 255)
+  CoverPhoto?: string;
 }

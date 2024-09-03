@@ -30,6 +30,7 @@ import { CreatePostInput } from './dto/create-post.input';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { UpdatePostInput } from './dto/update-post.input';
 import { TokenPayload } from 'src/auth/token-payload.interface';
+import { User } from 'src/user/entities/user.entity';
 // import { CacheInterceptor } from '@nestjs/cache-manager';
 // import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 
@@ -138,16 +139,14 @@ export class PostController {
   @Put('/api/:PostId/like')
   async updatePostLikes(
     @Param('PostId') PostId: string,
-    // @CurrentUser() user: User,
+    @CurrentUser() user: User,
   ) {
-    const user = 'B1B7174F-0E65-EF11-BDFD-6045BD1DF899';
-
     try {
       const updatedPost = await this.graphqlService.mutateData<any>(
         UPDATE_POST_LIKES_MUTATION,
         {
           PostId,
-          UserId: user,
+          UserId: user.UserId,
         },
       );
       return updatedPost.updatePostLikes;

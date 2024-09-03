@@ -14,7 +14,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const _request = ctx.getRequest<Request>();
-
     // Kiểm tra xem response đã được gửi hay chưa
     if (response.headersSent) {
       return;
@@ -39,7 +38,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
           <body>
             <h1>Forbidden!</h1>
-            <h2>Code 403</h2>
+            <h2>Code ${status} - ${message}</h2>
             <div id="jail">
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml"
                 xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1000 1000" preserveAspectRatio="xMinYMin"
