@@ -54,7 +54,7 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAllUserWithRedis(): Promise<User[]> {
     const users: User[] = await this.cacheManager.get(
       'AdminPermission-AllUsers',
     );
@@ -79,6 +79,39 @@ export class UserService {
     return resultPromise;
 
     // return this.userRepository.find();
+  }
+
+  async findAll(search?: string): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    if (!search) {
+      return queryBuilder.getMany();
+    } else {
+      const searchFullText = this.removeDiacritics(search);
+      console.log(searchFullText, search);
+      return queryBuilder
+        .leftJoinAndSelect('user.Following', 'Following')
+        .leftJoinAndSelect('user.Followers', 'Followers')
+        .where(
+          `(user.FirstName + ' ' + user.LastName) LIKE :searchFullText OR user.Username LIKE :searchFullText OR
+           (user.FirstName + ' ' + user.LastName) LIKE :search OR user.Username LIKE :search
+          `,
+          {
+            searchFullText: `%${searchFullText}%`,
+            search: `%${search}%`,
+          },
+        )
+        .getMany();
+    }
+  }
+
+  removeDiacritics(str: string): string {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
   }
 
   async findOne(UserId: string): Promise<User> {

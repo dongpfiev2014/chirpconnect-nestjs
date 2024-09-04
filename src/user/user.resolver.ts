@@ -17,10 +17,12 @@ export class UserResolver {
     return this.userService.create(createUserInput);
   }
 
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   @Query(() => [User], { name: 'findAllUsers' })
-  findAll() {
-    return this.userService.findAll();
+  findAll(
+    @Args('search', { type: () => String, nullable: true }) search?: string,
+  ) {
+    return this.userService.findAll(search);
   }
 
   @UseGuards(GqlAuthGuard)

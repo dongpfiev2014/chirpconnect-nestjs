@@ -7,9 +7,14 @@ $(document).ready(() => {
 });
 
 function loadPosts() {
-  $.get('/post/api', { postedBy: profileUserId, pinned: true }, (results) => {
-    outputPinnedPost(results, $('.pinnedPostContainer'));
-  });
+  $.get(
+    '/post/api/pinned',
+    { postedBy: profileUserId, pinned: true },
+    (results) => {
+      console.log(results);
+      outputPinnedPost(results, $('.pinnedPostContainer'));
+    },
+  );
   $.get('/post/api', { postedBy: profileUserId, isReply: false }, (results) => {
     outputPosts(results, $('.postsContainer'));
   });

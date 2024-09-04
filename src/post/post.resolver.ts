@@ -25,8 +25,9 @@ export class PostResolver {
     @Args('UserId', { type: () => ID, nullable: true }) UserId?: string,
     @Args('isReply', { nullable: true }) isReply?: boolean,
     @Args('followingOnly', { nullable: true }) followingOnly?: boolean,
+    @Args('search', { nullable: true }) search?: string,
   ) {
-    return this.postService.findAll(UserId, isReply, followingOnly);
+    return this.postService.findAll(UserId, isReply, followingOnly, search);
   }
 
   @Query(() => Post, { name: 'findOnePost' })
@@ -73,5 +74,13 @@ export class PostResolver {
     @Args('Pinned', { type: () => Boolean }) Pinned: boolean,
   ) {
     return this.postService.updatePinned(PostId, UserId, Pinned);
+  }
+
+  @Query(() => [Post], { name: 'findPostByPinned' })
+  findPostByPinned(
+    @Args('UserId', { type: () => ID }) UserId?: string,
+    @Args('Pinned', { type: () => Boolean }) Pinned?: boolean,
+  ) {
+    return this.postService.findPostByPinned(UserId, Pinned);
   }
 }

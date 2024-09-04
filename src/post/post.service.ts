@@ -44,6 +44,7 @@ export class PostService {
         ...createPostInput,
         PostedBy: user,
         ReplyTo: replyToPost,
+        ContentNoDiacritics: this.removeDiacritics(createPostInput.Content),
       });
       return await this.postRepository.save(newPost);
     } catch (error) {
@@ -55,6 +56,7 @@ export class PostService {
     UserId?: string,
     isReply?: boolean,
     followingOnly?: boolean,
+    search?: string,
   ): Promise<Post[]> {
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
@@ -90,6 +92,15 @@ export class PostService {
           '(SELECT follow.FollowingId FROM User_Following follow WHERE follow.UserId = :UserId)',
         { UserId },
       );
+    } else if (search) {
+      const searchFullText = this.removeDiacritics(search);
+      queryBuilder.andWhere(
+        'CONTAINS(post.ContentNoDiacritics, :fullTextSearch) OR post.ContentNoDiacritics LIKE :substringSearch',
+        {
+          fullTextSearch: `("${searchFullText}" OR FORMSOF(Inflectional, "${searchFullText}"))`,
+          substringSearch: `%${searchFullText}%`,
+        },
+      );
     }
 
     const posts = await queryBuilder.getMany();
@@ -122,6 +133,24 @@ export class PostService {
     //   order: { CreatedAt: 'DESC' },
     // });
     // return posts;
+  }
+
+  removeDiacritics(str: string): string {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+  }
+  async findPostByPinned(UserId: string, Pinned: boolean) {
+    const posts = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.PostedBy', 'PostedBy')
+      .where('post.PostedBy = :UserId', { UserId })
+      .andWhere('post.Pinned = :Pinned', { Pinned })
+      .getMany();
+    return posts.length ? posts : [];
   }
 
   async findOne(PostId: string): Promise<Post> {

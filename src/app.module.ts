@@ -19,6 +19,8 @@ import { RedirectInterceptor } from './interceptor/redirect.interceptor';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { PostModule } from './post/post.module';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
+import { SearchModule } from './search/search.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -80,6 +82,8 @@ import { HttpExceptionFilter } from './exception/http-exception.filter';
     ApolloClientModule,
     AuthModule,
     PostModule,
+    SearchModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [

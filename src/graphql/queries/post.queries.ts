@@ -35,11 +35,17 @@ export const CREATE_POST_MUTATION = gql`
 `;
 
 export const FIND_ALL_POSTS_QUERY = gql`
-  query FindAllPosts($UserId: ID, $isReply: Boolean, $followingOnly: Boolean) {
+  query FindAllPosts(
+    $UserId: ID
+    $isReply: Boolean
+    $followingOnly: Boolean
+    $search: String
+  ) {
     findAllPosts(
       UserId: $UserId
       isReply: $isReply
       followingOnly: $followingOnly
+      search: $search
     ) {
       PostId
       Content
@@ -230,6 +236,62 @@ export const UPDATE_POST_PINNED_MUTATION = gql`
     updatePinned(PostId: $PostId, UserId: $UserId, Pinned: $Pinned) {
       PostId
       Pinned
+    }
+  }
+`;
+
+export const FIND_POST_PINNED_QUERY = gql`
+  query FindPostByPinned($UserId: ID!, $Pinned: Boolean!) {
+    findPostByPinned(UserId: $UserId, Pinned: $Pinned) {
+      PostId
+      Content
+      Pinned
+      CreatedAt
+      UpdatedAt
+      PostedBy {
+        UserId
+        FirstName
+        LastName
+        Username
+        ProfilePic
+      }
+      LikedBy {
+        UserId
+      }
+      OriginalPost {
+        PostId
+        Content
+        Pinned
+        CreatedAt
+        UpdatedAt
+        PostedBy {
+          UserId
+          FirstName
+          LastName
+          Username
+          ProfilePic
+        }
+        RetweetUsers {
+          UserId
+        }
+        LikedBy {
+          UserId
+        }
+      }
+      RetweetUsers {
+        UserId
+        FirstName
+        LastName
+        Username
+        ProfilePic
+      }
+      ReplyTo {
+        PostId
+        PostedBy {
+          UserId
+          Username
+        }
+      }
     }
   }
 `;

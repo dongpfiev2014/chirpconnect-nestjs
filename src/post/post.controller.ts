@@ -20,6 +20,7 @@ import {
   DELETE_POST_MUTATION,
   FIND_ALL_POSTS_QUERY,
   FIND_ONE_POST_QUERY,
+  FIND_POST_PINNED_QUERY,
   UPDATE_POST_LIKES_MUTATION,
   UPDATE_POST_MUTATION,
   UPDATE_POST_PINNED_MUTATION,
@@ -72,6 +73,7 @@ export class PostController {
       postedBy?: string;
       isReply?: string;
       followingOnly: string;
+      search?: string;
     },
     @CurrentUser() user: TokenPayload,
   ) {
@@ -88,9 +90,48 @@ export class PostController {
         const FollowingOnly = query.followingOnly == 'true';
         const posts = await this.graphqlService.fetchData<any>(
           FIND_ALL_POSTS_QUERY,
-          { UserId: user.UserId, isReply: null, followingOnly: FollowingOnly },
+          {
+            UserId: user.UserId,
+            isReply: null,
+            followingOnly: FollowingOnly,
+          },
         );
         return posts.findAllPosts;
+      } else {
+        const posts = await this.graphqlService.fetchData<any>(
+          FIND_ALL_POSTS_QUERY,
+          {
+            UserId: null,
+            isReply: null,
+            followingOnly: null,
+            search: query.search,
+          },
+        );
+        return posts.findAllPosts;
+      }
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
+  }
+
+  @Get('/api/pinned')
+  async getPostByPinned(
+    @Query()
+    query: {
+      postedBy?: string;
+      pinned?: string;
+    },
+  ) {
+    try {
+      if (query.pinned !== undefined && query.pinned !== null) {
+        const Pinned = query.pinned == 'true';
+        const post = await this.graphqlService.fetchData<any>(
+          FIND_POST_PINNED_QUERY,
+          { UserId: query.postedBy, Pinned },
+        );
+        return post.findPostByPinned;
       }
     } catch (error) {
       return {

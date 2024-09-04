@@ -17,8 +17,8 @@ export const CREATE_USER_MUTATION = gql`
 `;
 
 export const FIND_ALL_USERS_QUERY = gql`
-  query FindAllUsers {
-    findAllUsers {
+  query FindAllUsers($search: String) {
+    findAllUsers(search: $search) {
       UserId
       FirstName
       LastName

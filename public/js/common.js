@@ -676,7 +676,6 @@ function outputPosts(results, container) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function outputPostsWithReplies(results, container) {
-  console.log(results);
   container.html('');
   if (results.ReplyTo !== null && results.ReplyTo.PostId !== undefined) {
     var html = createPostHtml(results.ReplyTo);
@@ -694,6 +693,7 @@ function outputPostsWithReplies(results, container) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function outputUsers(results, container) {
+  console.log(results);
   container.html('');
 
   results.forEach((result) => {

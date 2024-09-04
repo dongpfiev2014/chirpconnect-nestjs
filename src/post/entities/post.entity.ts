@@ -18,12 +18,16 @@ import {
 export class Post {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn('uuid')
-  @Index()
+  // @Index()   - Not necessary
   PostId: string;
 
   @Field({ defaultValue: '' })
   @Column({ type: 'nvarchar', length: 255, nullable: true, default: '' })
+  // @Index()   - Not necessary
   Content: string;
+
+  @Column({ type: 'nvarchar', length: 255, nullable: true })
+  ContentNoDiacritics: string;
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.Posts, { nullable: false })

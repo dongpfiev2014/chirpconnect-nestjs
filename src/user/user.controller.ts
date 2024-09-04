@@ -9,6 +9,7 @@ import {
   ParseFilePipe,
   Post,
   Put,
+  Query,
   Res,
   UploadedFile,
   UseGuards,
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
 import { User } from './entities/user.entity';
 import {
+  FIND_ALL_USERS_QUERY,
   FOLLOW_USER_MUTATION,
   GET_FOLLOWERS_QUERY,
   GET_FOLLOWING_USER_QUERY,
@@ -37,6 +39,21 @@ export class UserController {
     private readonly userService: UserService,
   ) {
     this.graphqlService = new GraphQLService(apolloClient);
+  }
+
+  @Get('/api')
+  async getUsers(@Query() query: { search: string }) {
+    try {
+      const result = await this.graphqlService.mutateData<any>(
+        FIND_ALL_USERS_QUERY,
+        { search: query.search },
+      );
+      return result.findAllUsers;
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
   }
 
   @Put('/api/:ProfileId/follow')

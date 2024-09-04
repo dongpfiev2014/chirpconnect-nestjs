@@ -52,7 +52,12 @@ nav {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  height: 100%;
+  background: linear-gradient(135deg, #f3f2f0, #dbe6e6);
+  height: 100vh;
+}
+
+.trend {
+  background: linear-gradient(135deg, #f3f0f0, #dbe6e6);
 }
 
 nav a {

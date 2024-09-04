@@ -6,17 +6,16 @@ $('#searchBox').keydown((event) => {
 
   timer = setTimeout(() => {
     value = textbox.val().trim();
-
     if (value == '') {
       $('.resultsContainer').html('');
     } else {
       search(value, searchType);
     }
-  }, 1000);
+  }, 500);
 });
 
 function search(searchTerm, searchType) {
-  var url = searchType == 'users' ? '/api/users' : '/api/posts';
+  var url = searchType == 'users' ? '/user/api' : '/post/api';
 
   $.get(url, { search: searchTerm }, (results) => {
     if (searchType == 'users') {
