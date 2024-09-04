@@ -130,14 +130,15 @@ $('#deletePostButton').click((event) => {
 
 $('#pinPostButton').click((event) => {
   var postId = $(event.target).data('id');
+  console.log(postId);
 
   $.ajax({
-    url: `/api/posts/${postId}`,
+    url: `/post/api/${postId}`,
     type: 'PUT',
-    data: { pinned: true },
+    data: { Pinned: true },
     success: (data, status, xhr) => {
       if (xhr.responseJSON.errorMessage) {
-        toastr.error('Could not delete post !!', 'Alert', {
+        toastr.error('Could not pin post !!', 'Alert', {
           closeButton: true,
           progressBar: true,
           positionClass: 'toast-top-right',
@@ -153,14 +154,15 @@ $('#pinPostButton').click((event) => {
 
 $('#unpinPostButton').click((event) => {
   var postId = $(event.target).data('id');
+  console.log(postId);
 
   $.ajax({
-    url: `/api/posts/${postId}`,
+    url: `/post/api/${postId}`,
     type: 'PUT',
-    data: { pinned: false },
+    data: { Pinned: false },
     success: (data, status, xhr) => {
       if (xhr.responseJSON.errorMessage) {
-        toastr.error('Could not delete post !!', 'Alert', {
+        toastr.error('Could not unpin post !!', 'Alert', {
           closeButton: true,
           progressBar: true,
           positionClass: 'toast-top-right',

@@ -224,3 +224,12 @@ export const UPDATE_RETWEET_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_POST_PINNED_MUTATION = gql`
+  mutation UpdatePinned($PostId: ID!, $UserId: ID!, $Pinned: Boolean!) {
+    updatePinned(PostId: $PostId, UserId: $UserId, Pinned: $Pinned) {
+      PostId
+      Pinned
+    }
+  }
+`;

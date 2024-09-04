@@ -65,4 +65,13 @@ export class PostResolver {
   ): Promise<DeleteResponse> {
     return this.postService.remove(PostId, UserId);
   }
+
+  @Mutation(() => Post)
+  updatePinned(
+    @Args('PostId', { type: () => ID }) PostId: string,
+    @Args('UserId', { type: () => ID }) UserId: string,
+    @Args('Pinned', { type: () => Boolean }) Pinned: boolean,
+  ) {
+    return this.postService.updatePinned(PostId, UserId, Pinned);
+  }
 }

@@ -22,6 +22,7 @@ import {
   FIND_ONE_POST_QUERY,
   UPDATE_POST_LIKES_MUTATION,
   UPDATE_POST_MUTATION,
+  UPDATE_POST_PINNED_MUTATION,
   UPDATE_RETWEET_MUTATION,
 } from 'src/graphql/queries/post.queries';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
@@ -206,6 +207,30 @@ export class PostController {
         },
       );
       return deletedPost;
+    } catch (error) {
+      return {
+        errorMessage: error.message,
+      };
+    }
+  }
+
+  @Put('/api/:PostId')
+  async updatePinned(
+    @Param('PostId') PostId: string,
+    @Body() body,
+    @CurrentUser() user: User,
+  ) {
+    const Pinned = body.Pinned == 'true';
+    try {
+      const updatedPost = await this.graphqlService.mutateData<any>(
+        UPDATE_POST_PINNED_MUTATION,
+        {
+          PostId,
+          UserId: user.UserId,
+          Pinned,
+        },
+      );
+      return updatedPost.updatePinned;
     } catch (error) {
       return {
         errorMessage: error.message,

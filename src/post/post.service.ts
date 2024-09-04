@@ -234,4 +234,37 @@ export class PostService {
     }
     return { success: true, message: 'Post successfully deleted' };
   }
+
+  async updatePinned(PostId: string, UserId: string, Pinned: boolean) {
+    return this.entityManager.transaction(async (manager) => {
+      console.log(PostId, UserId, Pinned);
+      let post;
+      if (Pinned) {
+        await manager
+          .createQueryBuilder()
+          .update('post')
+          .set({ Pinned: false })
+          .where('post.PostedBy = :UserId', { UserId })
+          .andWhere('PostId != :PostId', { PostId })
+          .execute();
+
+        post = await manager
+          .createQueryBuilder()
+          .update('post')
+          .set({ Pinned: true })
+          .where('PostId = :PostId', { PostId })
+          .output('INSERTED.*')
+          .execute();
+      } else {
+        post = await manager
+          .createQueryBuilder()
+          .update('post')
+          .set({ Pinned: false })
+          .where('PostId = :PostId', { PostId })
+          .output('INSERTED.*')
+          .execute();
+      }
+      return post.raw[0];
+    });
+  }
 }
