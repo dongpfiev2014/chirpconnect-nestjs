@@ -26,13 +26,36 @@ export class ChatService {
       .createQueryBuilder('chat')
       .leftJoinAndSelect('chat.Users', 'user')
       .leftJoinAndSelect('chat.LatestMessage', 'message')
-      .where('user.UserId = :UserId', { UserId })
+      // .where(
+      //   'chat.ChatId IN (SELECT ChatId FROM Chat_User WHERE UserId = :UserId)',
+      //   { UserId },
+      // )
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('uc.ChatId')
+          .from('Chat_User', 'uc')
+          .where('uc.UserId = :UserId')
+          .getQuery();
+        return `chat.ChatId IN (${subQuery})`;
+      })
+      .setParameter('UserId', UserId)
       .getMany();
+
     return chats;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
+  async findOne(UserId: string, ChatId: string) {
+    const chat = this.chatRepository
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.Users', 'user')
+      .where('chat.ChatId = :ChatId', { ChatId })
+      .andWhere(
+        'chat.ChatId IN (SELECT ChatId FROM Chat_User WHERE UserId = :UserId)',
+        { UserId },
+      )
+      .getOne();
+    return await chat;
   }
 
   update(id: number, updateChatInput: UpdateChatInput) {

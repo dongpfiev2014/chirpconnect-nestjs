@@ -18,7 +18,7 @@ $(document).ready(() => {
       var html = createMessageHtml(message, data[index + 1], lastSenderId);
       messages.push(html);
 
-      lastSenderId = message.sender._id;
+      lastSenderId = message.sender.UserId;
     });
 
     var messagesHtml = messages.join('');
@@ -119,7 +119,7 @@ function sendMessage(content) {
 }
 
 function addChatMessageHtml(message) {
-  if (!message || !message._id) {
+  if (!message || !message.MessageId) {
     alert('Message is not valid');
     return;
   }
@@ -131,16 +131,16 @@ function addChatMessageHtml(message) {
 }
 
 function createMessageHtml(message, nextMessage, lastSenderId) {
-  var sender = message.sender;
-  var senderName = sender.firstName + ' ' + sender.lastName;
+  var sender = message.Sender;
+  var senderName = sender.FirstName + ' ' + sender.LastName;
 
-  var currentSenderId = sender._id;
-  var nextSenderId = nextMessage != null ? nextMessage.sender._id : '';
+  var currentSenderId = sender.UserId;
+  var nextSenderId = nextMessage != null ? nextMessage.sender.UserId : '';
 
   var isFirst = lastSenderId != currentSenderId;
   var isLast = nextSenderId != currentSenderId;
 
-  var isMine = message.sender._id == userLoggedIn._id;
+  var isMine = message.sender.UserId == userLoggedIn.UserId;
   var liClassName = isMine ? 'mine' : 'theirs';
 
   var nameElement = '';
@@ -155,7 +155,7 @@ function createMessageHtml(message, nextMessage, lastSenderId) {
   var profileImage = '';
   if (isLast) {
     liClassName += ' last';
-    profileImage = `<img src='${sender.profilePic}'>`;
+    profileImage = `<img src='${sender.ProfilePic}'>`;
   }
 
   var imageContainer = '';

@@ -31,7 +31,7 @@ export class Chat {
   IsGroupChat: boolean;
 
   @Field(() => [User])
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, { eager: true })
   @JoinTable({
     name: 'Chat_User',
     joinColumn: { name: 'ChatId', referencedColumnName: 'ChatId' },

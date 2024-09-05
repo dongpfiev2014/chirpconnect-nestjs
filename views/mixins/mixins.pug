@@ -118,7 +118,7 @@ mixin createChatImage(chatData, userLoggedIn)
 
     - var i = 0
     - var maxImagesToShow = 3
-    - var remainingUsers = chatData.users.length - maxImagesToShow
+    - var remainingUsers = chatData.Users.length - maxImagesToShow
     - remainingUsers-- // Remove 1 since we won't show our own image
     
     .chatImagesContainer
@@ -126,13 +126,13 @@ mixin createChatImage(chatData, userLoggedIn)
             .userCount
                 span +#{remainingUsers}
 
-        each user in chatData.users
-            if chatData.users.length != 1 && user._id == userLoggedIn._id
+        each user in chatData.Users
+            if chatData.Users.length != 1 && user.UserId == userLoggedIn.UserId
                 - continue
             else if i >= maxImagesToShow    
                 - break
             
-            img(src=user.profilePic, alt="User's profile picture", title=user.firstName)
+            img(src=user.ProfilePic, alt="User's profile picture", title=user.FirstName)
             - i++
 
 mixin createChatNameModal(chat)
@@ -143,7 +143,7 @@ mixin createChatNameModal(chat)
                     h5#chatNameModalLabel.modal-title Change the chat name
                     button.btn.btn-close(type='button', data-dismiss='modal', aria-label='Close')
                 .modal-body
-                    input#chatNameTextbox(type="text", placeholder="Enter a name for this chat", value=chat.chatName)
+                    input#chatNameTextbox(type="text", placeholder="Enter a name for this chat", value=chat.ChatName)
                 .modal-footer
                     button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
                     button#chatNameButton.btn.btn-primary(type='button') Save

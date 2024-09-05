@@ -14,6 +14,7 @@ $(document).ready(() => {
 });
 
 function outputChatList(chatList, container) {
+  console.log(chatList);
   chatList.forEach((chat) => {
     var html = createChatHtml(chat);
     container.append(html);

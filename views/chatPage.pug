@@ -6,7 +6,7 @@ block content
         span.errorMessage #{errorMessage}
     else 
         script.
-            var chatId = '!{chat._id}';
+            var chatId = '!{chat.ChatId}';
 
         .chatPageContainer
             .chatTitleBarContainer
@@ -16,7 +16,7 @@ block content
             .mainContentContainer
                 .loadingSpinnerContainer
                     img(src="/images/loadingSpinner.gif", alt="Loading spinner")
-                .chatContainer(style="visibility: hidden", data-room=chat._id)
+                .chatContainer(style="visibility: hidden", data-room=chat.ChatId)
                     ul.chatMessages
 
                     .typingDots

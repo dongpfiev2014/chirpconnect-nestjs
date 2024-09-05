@@ -1,8 +1,16 @@
 import { ApolloClient } from '@apollo/client/core';
-import { Controller, Get, Inject, Render, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Render,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { TokenPayload } from 'src/auth/token-payload.interface';
+import { FIND_ONE_CHAT_QUERY } from 'src/graphql/queries/chat.queries';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
 
 @Controller('message')
@@ -29,12 +37,6 @@ export class MessageController {
   @Render('newMessage')
   async newMessage(@CurrentUser() user: TokenPayload) {
     try {
-      //   const profile = await this.graphqlService.fetchData<any>(
-      //     "FIND_USER_QUERY",
-      //     {
-      //       Username: user.Username,
-      //     },
-      //   );
       return {
         pageTitle: 'New Message',
         userLoggedIn: user,
@@ -43,6 +45,34 @@ export class MessageController {
     } catch (error) {
       return {
         errorMessage: error.message,
+      };
+    }
+  }
+
+  @Get('/:ChatId')
+  @Render('chatPage')
+  async getMessage(
+    @CurrentUser() user: TokenPayload,
+    @Param('ChatId') ChatId: string,
+  ) {
+    try {
+      const chat = await this.graphqlService.fetchData<any>(
+        FIND_ONE_CHAT_QUERY,
+        {
+          UserId: user.UserId,
+          ChatId,
+        },
+      );
+      return {
+        pageTitle: 'Chat',
+        userLoggedIn: user,
+        userLoggedInJs: JSON.stringify(user),
+        chat: chat.findOneChat,
+      };
+    } catch (error) {
+      return {
+        errorMessage:
+          'You are not authorized to access this page.' || error.message,
       };
     }
   }

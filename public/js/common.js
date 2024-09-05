@@ -788,10 +788,10 @@ function updateSelectedUsersHtml() {
 }
 
 function getChatName(chatData) {
-  var chatName = chatData.chatName;
+  var chatName = chatData.ChatName;
 
   if (!chatName) {
-    var otherChatUsers = getOtherChatUsers(chatData.users);
+    var otherChatUsers = getOtherChatUsers(chatData.Users);
     var namesArray = otherChatUsers.map(
       (user) => user.FirstName + ' ' + user.LastName,
     );
@@ -803,13 +803,12 @@ function getChatName(chatData) {
 
 function getOtherChatUsers(users) {
   if (users.length == 1) return users;
-
   return users.filter((user) => user.UserId != userLoggedIn.UserId);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function messageReceived(newMessage) {
-  if ($(`[data-room="${newMessage.chat._id}"]`).length == 0) {
+  if ($(`[data-room="${newMessage.Chat.ChatId}"]`).length == 0) {
     // Show popup notification
     showMessagePopup(newMessage);
   } else {
@@ -867,11 +866,11 @@ function showNotificationPopup(data) {
 }
 
 function showMessagePopup(data) {
-  if (!data.chat.latestMessage._id) {
-    data.chat.latestMessage = data;
+  if (!data.Chat.LatestMessage.ChatId) {
+    data.Chat.LatestMessage = data;
   }
 
-  var html = createChatHtml(data.chat);
+  var html = createChatHtml(data.Chat);
   var element = $(html);
   element.hide().prependTo('#notificationList').slideDown('fast');
 
@@ -896,7 +895,7 @@ function createNotificationHtml(notification) {
   var href = getNotificationUrl(notification);
   var className = notification.opened ? '' : 'active';
 
-  return `<a href='${href}' class='resultListItem notification ${className}' data-id='${notification._id}'>
+  return `<a href='${href}' class='resultListItem notification ${className}' data-id='${notification.NotificationId}'>
               <div class='resultsImageContainer'>
                   <img src='${userFrom.ProfilePic}'>
               </div>
@@ -949,15 +948,15 @@ function getNotificationUrl(notification) {
 function createChatHtml(chatData) {
   var chatName = getChatName(chatData);
   var image = getChatImageElements(chatData);
-  var latestMessage = getLatestMessage(chatData.latestMessage);
+  var latestMessage = getLatestMessage(chatData.LatestMessage);
 
   var activeClass =
-    !chatData.latestMessage ||
-    chatData.latestMessage.readBy.includes(userLoggedIn.UserId)
+    !chatData.LatestMessage ||
+    chatData.LatestMessage.ReadBy.includes(userLoggedIn.UserId)
       ? ''
       : 'active';
 
-  return `<a href='/messages/${chatData._id}' class='resultListItem ${activeClass}'>
+  return `<a href='/message/${chatData.ChatId}' class='resultListItem ${activeClass}'>
               ${image}
               <div class='resultsDetailsContainer ellipsis'>
                   <span class='heading ellipsis'>${chatName}</span>
@@ -968,15 +967,15 @@ function createChatHtml(chatData) {
 
 function getLatestMessage(latestMessage) {
   if (latestMessage != null) {
-    var sender = latestMessage.sender;
-    return `${sender.FirstName} ${sender.LastName}: ${latestMessage.content}`;
+    var sender = latestMessage.Sender;
+    return `${sender.FirstName} ${sender.LastName}: ${latestMessage.Content}`;
   }
 
   return 'New chat';
 }
 
 function getChatImageElements(chatData) {
-  var otherChatUsers = getOtherChatUsers(chatData.users);
+  var otherChatUsers = getOtherChatUsers(chatData.Users);
 
   var groupChatClass = '';
   var chatImage = getUserChatImageElement(otherChatUsers[0]);
