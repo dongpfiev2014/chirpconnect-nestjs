@@ -1,7 +1,12 @@
 $(document).ready(() => {
-  $.get('/api/chats', (data, status, xhr) => {
+  $.get('/chat/api', (data, status, xhr) => {
     if (xhr.status == 400) {
-      alert('Could not get chat list.');
+      toastr.error('Could not get chat list.', 'Alert', {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: '4000',
+      });
     } else {
       outputChatList(data, $('.resultsContainer'));
     }

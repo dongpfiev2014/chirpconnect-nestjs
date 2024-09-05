@@ -21,6 +21,7 @@ import { PostModule } from './post/post.module';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
 import { SearchModule } from './search/search.module';
 import { MessageModule } from './message/message.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { MessageModule } from './message/message.module';
     PostModule,
     SearchModule,
     MessageModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

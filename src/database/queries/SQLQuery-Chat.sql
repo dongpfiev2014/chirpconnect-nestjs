@@ -1,0 +1,7 @@
+SELECT TOP (1000) [ChatId]
+      ,[ChatName]
+      ,[IsGroupChat]
+      ,[CreatedAt]
+      ,[UpdatedAt]
+      ,[LatestMessage]
+  FROM [dbo].[Chat]

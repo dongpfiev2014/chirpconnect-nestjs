@@ -72,6 +72,5 @@ SELECT *
 FROM Post 
 WHERE CONTAINS(ContentNoDiacritics, '"Cuoc song"');
 
-
 */
 

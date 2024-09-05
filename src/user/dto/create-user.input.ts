@@ -46,7 +46,10 @@ export class CreateUserInput {
   @Length(0, 255)
   ProfilePic?: string;
 
-  @Field()
+  @Field({
+    defaultValue:
+      'https://res.cloudinary.com/dq4kbmkrf/image/upload/v1725403871/images/cat.jpg',
+  })
   @IsOptional()
   @IsString()
   @Length(0, 255)

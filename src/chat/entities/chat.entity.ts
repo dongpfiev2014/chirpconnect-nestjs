@@ -1,5 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Chat } from 'src/chat/entities/chat.entity';
+import { Message } from 'src/message/entities/message.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   BeforeInsert,
@@ -10,40 +10,39 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
-  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-@ObjectType('Message')
-@Entity('Message')
-export class Message {
+@ObjectType('Chat')
+@Entity('Chat')
+export class Chat {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn('uuid')
-  MessageId: string;
+  ChatId: string;
 
-  @Field(() => User)
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'Sender' })
-  Sender: User;
+  @Field({ nullable: true })
+  @Column({ type: 'nvarchar', length: 255, nullable: true })
+  ChatName: string;
 
-  @Field({ nullable: false })
-  @Column({ type: 'nvarchar', length: 'max', nullable: false })
-  Content: string;
-
-  @Field(() => Chat)
-  @ManyToOne(() => Chat)
-  @JoinColumn({ name: 'Chat' })
-  Chat: Chat;
+  @Field()
+  @Column({ default: false })
+  IsGroupChat: boolean;
 
   @Field(() => [User])
   @ManyToMany(() => User)
   @JoinTable({
-    name: 'Message_ReadBy',
-    joinColumn: { name: 'MessageId', referencedColumnName: 'MessageId' },
+    name: 'Chat_User',
+    joinColumn: { name: 'ChatId', referencedColumnName: 'ChatId' },
     inverseJoinColumn: { name: 'UserId', referencedColumnName: 'UserId' },
   })
-  ReadBy: User[];
+  Users: User[];
+
+  @Field(() => Message, { nullable: true })
+  @OneToOne(() => Message, { nullable: true })
+  @JoinColumn({ name: 'LatestMessageId' })
+  LatestMessage: Message;
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
@@ -56,8 +55,8 @@ export class Message {
   @BeforeInsert()
   @BeforeUpdate()
   trimName() {
-    if (this.Content) {
-      this.Content = this.Content.trim();
+    if (this.ChatName) {
+      this.ChatName = this.ChatName.trim();
     }
   }
 }

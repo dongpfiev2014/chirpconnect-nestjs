@@ -353,22 +353,22 @@ $('#userSearchTextbox').keydown((event) => {
     } else {
       searchUsers(value);
     }
-  }, 1000);
+  }, 500);
 });
 
 $('#createChatButton').click(() => {
   var data = JSON.stringify(selectedUsers);
 
-  $.post('/api/chats', { users: data }, (chat) => {
-    if (!chat || !chat._id)
+  $.post('/chat/api', { users: data }, (chat) => {
+    if (!chat || !chat.ChatId)
       return toastr.error('Invalid response from server.', 'Alert', {
         closeButton: true,
         progressBar: true,
         positionClass: 'toast-top-right',
-        timeOut: '5000',
+        timeOut: '4000',
       });
 
-    window.location.href = `/messages/${chat._id}`;
+    window.location.href = `/message/${chat.ChatId}`;
   });
 });
 
@@ -738,18 +738,18 @@ function createUserHtml(userData, showFollowButton) {
 }
 
 function searchUsers(searchTerm) {
-  $.get('/api/users', { search: searchTerm }, (results) => {
+  $.get('/user/api', { search: searchTerm }, (results) => {
     outputSelectableUsers(results, $('.resultsContainer'));
   });
 }
 
 function outputSelectableUsers(results, container) {
   container.html('');
-
+  console.log(results);
   results.forEach((result) => {
     if (
-      result._id == userLoggedIn._id ||
-      selectedUsers.some((u) => u._id == result._id)
+      result.UserId == userLoggedIn.UserId ||
+      selectedUsers.some((u) => u.UserId == result.UserId)
     ) {
       return;
     }
@@ -778,7 +778,7 @@ function updateSelectedUsersHtml() {
   var elements = [];
 
   selectedUsers.forEach((user) => {
-    var name = user.firstName + ' ' + user.lastName;
+    var name = user.FirstName + ' ' + user.LastName;
     var userElement = $(`<span class='selectedUser'>${name}</span>`);
     elements.push(userElement);
   });
@@ -793,7 +793,7 @@ function getChatName(chatData) {
   if (!chatName) {
     var otherChatUsers = getOtherChatUsers(chatData.users);
     var namesArray = otherChatUsers.map(
-      (user) => user.firstName + ' ' + user.lastName,
+      (user) => user.FirstName + ' ' + user.LastName,
     );
     chatName = namesArray.join(', ');
   }
@@ -804,7 +804,7 @@ function getChatName(chatData) {
 function getOtherChatUsers(users) {
   if (users.length == 1) return users;
 
-  return users.filter((user) => user._id != userLoggedIn._id);
+  return users.filter((user) => user.UserId != userLoggedIn.UserId);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -898,7 +898,7 @@ function createNotificationHtml(notification) {
 
   return `<a href='${href}' class='resultListItem notification ${className}' data-id='${notification._id}'>
               <div class='resultsImageContainer'>
-                  <img src='${userFrom.profilePic}'>
+                  <img src='${userFrom.ProfilePic}'>
               </div>
               <div class='resultsDetailsContainer ellipsis'>
                   <span class='ellipsis'>${text}</span>
@@ -909,11 +909,11 @@ function createNotificationHtml(notification) {
 function getNotificationText(notification) {
   var userFrom = notification.userFrom;
 
-  if (!userFrom.firstName || !userFrom.lastName) {
+  if (!userFrom.FirstName || !userFrom.LastName) {
     return alert('user from data not populated');
   }
 
-  var userFromName = `${userFrom.firstName} ${userFrom.lastName}`;
+  var userFromName = `${userFrom.FirstName} ${userFrom.LastName}`;
 
   var text;
 
@@ -953,7 +953,7 @@ function createChatHtml(chatData) {
 
   var activeClass =
     !chatData.latestMessage ||
-    chatData.latestMessage.readBy.includes(userLoggedIn._id)
+    chatData.latestMessage.readBy.includes(userLoggedIn.UserId)
       ? ''
       : 'active';
 
@@ -969,7 +969,7 @@ function createChatHtml(chatData) {
 function getLatestMessage(latestMessage) {
   if (latestMessage != null) {
     var sender = latestMessage.sender;
-    return `${sender.firstName} ${sender.lastName}: ${latestMessage.content}`;
+    return `${sender.FirstName} ${sender.LastName}: ${latestMessage.content}`;
   }
 
   return 'New chat';
@@ -990,9 +990,9 @@ function getChatImageElements(chatData) {
 }
 
 function getUserChatImageElement(user) {
-  if (!user || !user.profilePic) {
+  if (!user || !user.ProfilePic) {
     return alert('User passed into function is invalid');
   }
 
-  return `<img src='${user.profilePic}' alt='User's profile pic'>`;
+  return `<img src='${user.ProfilePic}' alt='User's profile pic'>`;
 }

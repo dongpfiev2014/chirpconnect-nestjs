@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Chat } from 'src/chat/entities/chat.entity';
 import { Post } from 'src/post/entities/post.entity';
 import {
   Column,
@@ -93,6 +94,10 @@ export class User {
   @Field(() => [User])
   @ManyToMany(() => User, (user) => user.Following)
   Followers: User[];
+
+  @Field(() => [Chat])
+  @ManyToMany(() => Chat, (chat) => chat.Users)
+  Chats: Chat[];
 
   @Field()
   @CreateDateColumn({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
