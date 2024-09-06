@@ -22,6 +22,7 @@ import { HttpExceptionFilter } from './exception/http-exception.filter';
 import { SearchModule } from './search/search.module';
 import { MessageModule } from './message/message.module';
 import { ChatModule } from './chat/chat.module';
+import { WebsocketsModule } from './websockets/websockets.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { ChatModule } from './chat/chat.module';
     SearchModule,
     MessageModule,
     ChatModule,
+    WebsocketsModule,
   ],
   controllers: [AppController],
   providers: [

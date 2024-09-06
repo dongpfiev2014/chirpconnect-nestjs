@@ -5,6 +5,7 @@
     "FORMSOF",
     "resave",
     "textbox",
-    "toastr"
+    "toastr",
+    "Websockets"
   ]
 }

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-container {
+            width: 300px;
+            margin: 50px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        #messages {
+            border: 1px solid #000;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        #message-form {
+            display: flex;
+        }
+
+        #message-form input[type="text"] {
+            flex: 1;
+            padding: 5px;
+        }
+
+        #message-form button {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat-container">
+        <h2>Chat Room</h2>
+        <div id="messages"></div>
+        <form id="message-form">
+            <input id="nickname" type="text" placeholder="Enter nickname" required />
+            <input id="message" type="text" placeholder="Enter message" required />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script>
+        // Connect to WebSocket server 
+        const socket = io('http://localhost:3002');
+
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message');
+        const nicknameInput = document.getElementById('nickname');
+        const messagesDiv = document.getElementById('messages');
+
+        // Show messages
+        function appendMessage(data) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${data.nickname}: ${data.message}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; //Scroll
+        }
+
+        // Handle form
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value;
+            const nickname = nicknameInput.value;
+
+            // Send message via WebSocket
+            socket.emit('newMessage', { nickname, message });
+
+
+            messageInput.value = '';
+        });
+        socket.on("connect", () => {
+            appendMessage({ nickname: 'System', message: 'User connected!' });
+        })
+
+        // Listen event 'message' from server
+        socket.on('message', (data) => {
+            appendMessage(data);
+        });
+
+
+        socket.on('user-joined', (data) => {
+            appendMessage({ nickname: 'System', message: data.message });
+        });
+
+        socket.on('user-disconnected', (data) => {
+            appendMessage({ nickname: 'System', message: data.message });
+        });
+    </script>
+</body>
+
+</html>

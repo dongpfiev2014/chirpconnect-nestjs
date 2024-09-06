@@ -34,7 +34,9 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.4.1",
     "@nestjs/typeorm": "^10.0.2",
+    "@nestjs/websockets": "^10.4.1",
     "@types/bcrypt": "^5.0.2",
     "@types/body-parser": "^1.19.5",
     "@types/cookie-parser": "^1.4.7",
@@ -63,6 +65,7 @@
     "pug": "^3.0.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
