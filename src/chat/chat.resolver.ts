@@ -31,7 +31,7 @@ export class ChatResolver {
 
   @Mutation(() => Chat)
   updateChat(@Args('updateChatInput') updateChatInput: UpdateChatInput) {
-    return this.chatService.update(updateChatInput.id, updateChatInput);
+    return this.chatService.update(updateChatInput);
   }
 
   @Mutation(() => Chat)

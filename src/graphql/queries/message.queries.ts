@@ -1,33 +1,40 @@
 import { gql } from '@apollo/client/core';
 
 export const CREATE_MESSAGE_MUTATION = gql`
-  mutation CreateChat($createChatInput: [CreateChatInput!]!) {
-    createChat(createChatInput: $createChatInput) {
-      ChatId
-      ChatName
-      IsGroupChat
-      Users {
-        UserId
-      }
+  mutation CreateMessage($createMessageInput: CreateMessageInput!) {
+    createMessage(createMessageInput: $createMessageInput) {
+      MessageId
+      Content
       CreatedAt
       UpdatedAt
+      Sender {
+        UserId
+        FirstName
+        LastName
+        Username
+        Email
+        ProfilePic
+        CoverPhoto
+      }
+      Chat {
+        ChatId
+        ChatName
+        IsGroupChat
+        CreatedAt
+        UpdatedAt
+      }
     }
   }
 `;
 
 export const FIND_ALL_MESSAGES_QUERY = gql`
-  query FindAllChats($UserId: ID!) {
-    findAllChats(UserId: $UserId) {
-      ChatId
-      ChatName
-      IsGroupChat
+  query FindAllMessages($ChatId: ID!) {
+    findAllMessages(ChatId: $ChatId) {
+      MessageId
+      Content
       CreatedAt
       UpdatedAt
-      LatestMessage {
-        MessageId
-        Content
-      }
-      Users {
+      Sender {
         UserId
         FirstName
         LastName

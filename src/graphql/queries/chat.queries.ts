@@ -26,17 +26,24 @@ export const FIND_ALL_CHATS_QUERY = gql`
       LatestMessage {
         MessageId
         Content
+        CreatedAt
+        UpdatedAt
+        Sender {
+          UserId
+          FirstName
+          LastName
+        }
+        ReadBy {
+          UserId
+          FirstName
+          LastName
+        }
       }
       Users {
         UserId
         FirstName
         LastName
-        Username
-        Email
         ProfilePic
-        CoverPhoto
-        CreatedAt
-        UpdatedAt
       }
     }
   }
@@ -65,6 +72,18 @@ export const FIND_ONE_CHAT_QUERY = gql`
         CreatedAt
         UpdatedAt
       }
+    }
+  }
+`;
+
+export const UPDATE_CHAT_MUTATION = gql`
+  mutation UpdateChat($updateChatInput: UpdateChatInput!) {
+    updateChat(updateChatInput: $updateChatInput) {
+      ChatId
+      ChatName
+      IsGroupChat
+      CreatedAt
+      UpdatedAt
     }
   }
 `;

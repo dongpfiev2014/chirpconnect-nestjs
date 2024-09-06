@@ -6,11 +6,11 @@ $(document).ready(() => {
   socket.on('typing', () => $('.typingDots').show());
   socket.on('stop typing', () => $('.typingDots').hide());
 
-  $.get(`/api/chats/${chatId}`, (data) =>
-    $('#chatName').text(getChatName(data)),
-  );
+  $.get(`/chat/api/${chatId}`, (data) => {
+    $('#chatName').text(getChatName(data));
+  });
 
-  $.get(`/api/chats/${chatId}/messages`, (data) => {
+  $.get(`/chat/api/${chatId}/messages`, (data) => {
     var messages = [];
     var lastSenderId = '';
 
@@ -18,7 +18,7 @@ $(document).ready(() => {
       var html = createMessageHtml(message, data[index + 1], lastSenderId);
       messages.push(html);
 
-      lastSenderId = message.sender.UserId;
+      lastSenderId = message.Sender.UserId;
     });
 
     var messagesHtml = messages.join('');
@@ -33,14 +33,20 @@ $(document).ready(() => {
 
 $('#chatNameButton').click(() => {
   var name = $('#chatNameTextbox').val().trim();
+  console.log(name);
 
   $.ajax({
-    url: '/api/chats/' + chatId,
+    url: '/chat/api/' + chatId,
     type: 'PUT',
     data: { chatName: name },
     success: (data, status, xhr) => {
-      if (xhr.status != 204) {
-        alert('could not update');
+      if (xhr.status != 200) {
+        toastr.error('Could not update', 'Alert', {
+          closeButton: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          timeOut: '5000',
+        });
       } else {
         location.reload();
       }
@@ -100,11 +106,17 @@ function messageSubmitted() {
 
 function sendMessage(content) {
   $.post(
-    '/api/messages',
+    '/message/api',
     { content: content, chatId: chatId },
     (data, status, xhr) => {
-      if (xhr.status != 201) {
-        alert('Could not send message');
+      console.log(data, xhr);
+      if (xhr.status !== 201) {
+        toastr.error('Could not send message', 'Alert', {
+          closeButton: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          timeOut: '5000',
+        });
         $('.inputTextbox').val(content);
         return;
       }
@@ -120,7 +132,12 @@ function sendMessage(content) {
 
 function addChatMessageHtml(message) {
   if (!message || !message.MessageId) {
-    alert('Message is not valid');
+    toastr.error('Message is not valid', 'Alert', {
+      closeButton: true,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      timeOut: '5000',
+    });
     return;
   }
 
@@ -135,12 +152,12 @@ function createMessageHtml(message, nextMessage, lastSenderId) {
   var senderName = sender.FirstName + ' ' + sender.LastName;
 
   var currentSenderId = sender.UserId;
-  var nextSenderId = nextMessage != null ? nextMessage.sender.UserId : '';
+  var nextSenderId = nextMessage != null ? nextMessage.Sender.UserId : '';
 
   var isFirst = lastSenderId != currentSenderId;
   var isLast = nextSenderId != currentSenderId;
 
-  var isMine = message.sender.UserId == userLoggedIn.UserId;
+  var isMine = message.Sender.UserId == userLoggedIn.UserId;
   var liClassName = isMine ? 'mine' : 'theirs';
 
   var nameElement = '';
@@ -170,7 +187,7 @@ function createMessageHtml(message, nextMessage, lastSenderId) {
                 <div class='messageContainer'>
                     ${nameElement}
                     <span class='messageBody'>
-                        ${message.content}
+                        ${message.Content}
                     </span>
                 </div>
             </li>`;
@@ -189,7 +206,7 @@ function scrollToBottom(animated) {
 
 function markAllMessagesAsRead() {
   $.ajax({
-    url: `/api/chats/${chatId}/messages/markAsRead`,
+    url: `/chat/api/${chatId}/messages/markAsRead`,
     type: 'PUT',
     success: () => refreshMessagesBadge(),
   });

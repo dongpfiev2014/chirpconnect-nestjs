@@ -9,3 +9,4 @@ SELECT TOP (1000) [UserId]
       ,[ProfilePic]
       ,[CoverPhoto]
   FROM [dbo].[User]
+

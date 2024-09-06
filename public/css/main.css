@@ -609,7 +609,7 @@ button span {
 
 #chatName:hover {
   border: 1px solid var(--lightGrey);
-  cursor: text;
+  cursor: pointer;
 }
 
 .chatContainer {
@@ -681,6 +681,7 @@ button span {
 }
 
 #chatNameTextbox {
+  border: none;
   width: 100%;
 }
 

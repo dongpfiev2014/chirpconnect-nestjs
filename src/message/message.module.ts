@@ -4,9 +4,10 @@ import { MessageResolver } from './message.resolver';
 import { MessageController } from './message.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Message])],
+  imports: [TypeOrmModule.forFeature([Message]), ChatModule],
   providers: [MessageResolver, MessageService],
   controllers: [MessageController],
 })

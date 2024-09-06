@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, ID } from '@nestjs/graphql';
 import { MessageService } from './message.service';
 import { Message } from './entities/message.entity';
 import { CreateMessageInput } from './dto/create-message.input';
@@ -15,9 +15,9 @@ export class MessageResolver {
     return this.messageService.create(createMessageInput);
   }
 
-  @Query(() => [Message], { name: 'message' })
-  findAll() {
-    return this.messageService.findAll();
+  @Query(() => [Message], { name: 'findAllMessages' })
+  findAll(@Args('ChatId', { type: () => ID }) ChatId: string) {
+    return this.messageService.findAll(ChatId);
   }
 
   @Query(() => Message, { name: 'message' })

@@ -1,6 +1,6 @@
 $(document).ready(() => {
   $.get('/chat/api', (data, status, xhr) => {
-    if (xhr.status == 400) {
+    if (xhr.status !== 200) {
       toastr.error('Could not get chat list.', 'Alert', {
         closeButton: true,
         progressBar: true,

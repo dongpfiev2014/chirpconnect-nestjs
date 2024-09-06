@@ -745,7 +745,6 @@ function searchUsers(searchTerm) {
 
 function outputSelectableUsers(results, container) {
   container.html('');
-  console.log(results);
   results.forEach((result) => {
     if (
       result.UserId == userLoggedIn.UserId ||
@@ -952,7 +951,9 @@ function createChatHtml(chatData) {
 
   var activeClass =
     !chatData.LatestMessage ||
-    chatData.LatestMessage.ReadBy.includes(userLoggedIn.UserId)
+    chatData.LatestMessage.ReadBy.some(
+      (user) => user.UserId === userLoggedIn.UserId,
+    )
       ? ''
       : 'active';
 

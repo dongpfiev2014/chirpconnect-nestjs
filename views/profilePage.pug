@@ -36,7 +36,7 @@ block content
 
             .profileButtonsContainer
                 if profileUser.UserId != userLoggedIn.UserId
-                    a.profileButton(href=`/messages/${profileUser.UserId}`)
+                    a.profileButton(href=`/message/${profileUser.UserId}`)
                         i.fas.fa-envelope
 
                     - var profileUserId = profileUser.UserId.toString();
