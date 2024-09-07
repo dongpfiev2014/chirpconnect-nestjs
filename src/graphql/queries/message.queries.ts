@@ -22,6 +22,12 @@ export const CREATE_MESSAGE_MUTATION = gql`
         IsGroupChat
         CreatedAt
         UpdatedAt
+        Users {
+          UserId
+          FirstName
+          LastName
+          Username
+        }
       }
     }
   }

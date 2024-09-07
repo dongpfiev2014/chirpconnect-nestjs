@@ -1,4 +1,4 @@
-import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { UseFilters } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,19 +8,21 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { IsNotEmpty, IsString } from 'class-validator';
+// import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { WebsocketExceptionFilter } from './ws-exception.filter';
 import { Server, Socket } from 'socket.io';
+import { TokenPayload } from 'src/auth/token-payload.interface';
+import { Message } from 'src/message/entities/message.entity';
 
-class Message {
-  @IsNotEmpty()
-  @IsString()
-  nickname: string;
+// class Message {
+//   @IsNotEmpty()
+//   @IsUUID()
+//   MessageId: string;
 
-  @IsNotEmpty()
-  @IsString()
-  message: string;
-}
+//   @IsNotEmpty()
+//   @IsString()
+//   Content: string;
+// }
 
 @WebSocketGateway({
   cors: {
@@ -34,11 +36,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log('New user connected..', client.id);
-
     //client.broadcast.emit ensures that every other client in the same namespace, or the same room (if you use rooms), receives the event except this client.
-    client.broadcast.emit('user-joined', {
-      message: `User joined the chat with ${client.id}`,
+    client.broadcast.emit('connected', {
+      message: `User has connected with ${client.id}`,
     });
 
     //this.server.emit will emit the event to all clients connected to the server without excluding anyone, including the current client.
@@ -50,22 +50,59 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log('User disconnected..', client.id);
-    this.server.emit('user-disconnected', {
-      message: `User left the chat with ${client.id}`,
+    this.server.emit('disconnected', {
+      message: `User disconnected from ${client.id}`,
     });
   }
 
-  @SubscribeMessage('newMessage')
-  @UsePipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }),
-  )
-  handleMessage(
-    @MessageBody() message: Message,
-    @ConnectedSocket() _client: Socket,
+  @SubscribeMessage('setup')
+  handleSetup(
+    @MessageBody() userData: TokenPayload,
+    @ConnectedSocket() client: Socket,
   ) {
-    this.server.emit('message', message);
+    client.join(userData.UserId);
+    client.emit('connected');
+  }
+
+  @SubscribeMessage('join room')
+  handleJoinRoom(@MessageBody() room, @ConnectedSocket() client: Socket) {
+    console.log(`Client ${client.id} joined room ${room}`);
+    client.join(room);
+  }
+
+  @SubscribeMessage('typing')
+  handleTyping(@MessageBody() room, @ConnectedSocket() client: Socket) {
+    console.log(room);
+    console.log('Typing ok :)))');
+    client.in(room).emit('typing');
+  }
+
+  @SubscribeMessage('stop typing')
+  handleStopTyping(@MessageBody() room, @ConnectedSocket() client: Socket) {
+    console.log(room);
+    console.log('Stop Typing :)))');
+    client.in(room).emit('stop typing');
+  }
+
+  @SubscribeMessage('new message')
+  // @UsePipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true,
+  //   }),
+  // )
+  handleMessage(
+    @MessageBody() newMessage: Message,
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(newMessage);
+    const chat = newMessage.Chat;
+    if (!chat.Users) {
+      return console.log('Chat.Users not defined');
+    }
+    chat.Users.forEach((user) => {
+      if (user.UserId == newMessage.Sender.UserId) return;
+      client.in(user.UserId).emit('message received', newMessage);
+    });
   }
 }

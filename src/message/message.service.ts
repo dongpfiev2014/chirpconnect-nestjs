@@ -23,7 +23,7 @@ export class MessageService {
     const [result, _updatedChat] = await Promise.all([
       this.messageRepository.findOne({
         where: { MessageId: savedMessage.MessageId },
-        relations: ['Sender', 'Chat'],
+        relations: ['Sender', 'Chat', 'Chat.Users'],
       }),
       this.chatRepository.update(
         { ChatId: createMessageInput.ChatId },

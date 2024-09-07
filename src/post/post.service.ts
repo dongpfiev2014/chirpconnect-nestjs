@@ -14,6 +14,7 @@ import {
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DeleteResponse } from './type/delete-response.type';
 import { User } from 'src/user/entities/user.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class PostService {
@@ -21,6 +22,7 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectEntityManager() private entityManager: EntityManager,
+    private notificationService: NotificationService,
   ) {}
   async create(
     createPostInput: CreatePostInput,
@@ -31,6 +33,7 @@ export class PostService {
       if (createPostInput.ReplyTo) {
         replyToPost = await this.postRepository.findOne({
           where: { PostId: createPostInput.ReplyTo },
+          relations: ['PostedBy'],
         });
         if (!replyToPost) {
           throw new BadRequestException('Reply post not found');
@@ -46,7 +49,18 @@ export class PostService {
         ReplyTo: replyToPost,
         ContentNoDiacritics: this.removeDiacritics(createPostInput.Content),
       });
-      return await this.postRepository.save(newPost);
+      const result = await this.postRepository.save(newPost);
+
+      if (createPostInput.ReplyTo) {
+        await this.notificationService.insertNotification({
+          UserToId: replyToPost.PostedBy.UserId,
+          UserFromId: UserId,
+          NotificationType: 'reply',
+          EntityId: result.PostId,
+        });
+      }
+
+      return result;
     } catch (error) {
       throw new BadRequestException('Error creating post', error.message);
     }
@@ -199,7 +213,10 @@ export class PostService {
   async updatePostLikes(PostId: string, UserId: string) {
     return this.entityManager.transaction(async (manager) => {
       const [post, userEntity] = await Promise.all([
-        manager.findOne(Post, { where: { PostId }, relations: ['LikedBy'] }),
+        manager.findOne(Post, {
+          where: { PostId },
+          relations: ['LikedBy', 'PostedBy'],
+        }),
         manager.findOne(User, { where: { UserId } }),
       ]);
 
@@ -215,6 +232,15 @@ export class PostService {
         ? post.LikedBy.filter((likedUser) => likedUser.UserId !== UserId)
         : [...post.LikedBy, userEntity];
 
+      if (!hasLiked) {
+        await this.notificationService.insertNotification({
+          UserToId: post.PostedBy.UserId,
+          UserFromId: UserId,
+          NotificationType: 'postLike',
+          EntityId: post.PostId,
+        });
+      }
+
       return await manager.save(post);
     });
   }
@@ -225,7 +251,7 @@ export class PostService {
         manager.findOne(User, { where: { UserId } }),
         manager.findOne(Post, {
           where: { PostId },
-          relations: ['RetweetUsers', 'RetweetedPosts'],
+          relations: ['RetweetUsers', 'RetweetedPosts', 'PostedBy'],
         }),
       ]);
 
@@ -243,6 +269,14 @@ export class PostService {
         const savedRepost = await manager.save(repost);
         OriginalPost.RetweetedPosts.push(savedRepost);
         OriginalPost.RetweetUsers.push(existingUser);
+
+        await this.notificationService.insertNotification({
+          UserToId: OriginalPost.PostedBy.UserId,
+          UserFromId: UserId,
+          NotificationType: 'retweet',
+          EntityId: OriginalPost.PostId,
+        });
+
         return await manager.save(OriginalPost);
       } else {
         OriginalPost.RetweetUsers = OriginalPost.RetweetUsers.filter(

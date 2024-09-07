@@ -5,3 +5,5 @@ SELECT TOP (1000) [MessageId]
       ,[CreatedAt]
       ,[UpdatedAt]
   FROM [dbo].[Message]
+
+

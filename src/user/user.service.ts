@@ -22,6 +22,7 @@ import {
 } from './user.constants';
 import { Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @InjectEntityManager() private entityManager: EntityManager,
+    private readonly notificationService: NotificationService,
     private authService: AuthService,
     private readonly s3Service: S3Service,
   ) {}
@@ -193,6 +195,12 @@ export class UserService {
 
       if (!isFollowed) {
         existingUser.Following.push(targetUser);
+        await this.notificationService.insertNotification({
+          UserToId: ProfileId,
+          UserFromId: UserId,
+          NotificationType: 'follow',
+          EntityId: UserId,
+        });
       } else {
         existingUser.Following = existingUser.Following.filter(
           (follower) => follower.UserId !== ProfileId,

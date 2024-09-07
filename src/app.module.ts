@@ -23,6 +23,8 @@ import { SearchModule } from './search/search.module';
 import { MessageModule } from './message/message.module';
 import { ChatModule } from './chat/chat.module';
 import { WebsocketsModule } from './websockets/websockets.module';
+import { NotificationModule } from './notification/notification.module';
+// import { KeepAliveService } from './keep-alive/keep-alive.service';
 
 @Module({
   imports: [
@@ -88,6 +90,7 @@ import { WebsocketsModule } from './websockets/websockets.module';
     MessageModule,
     ChatModule,
     WebsocketsModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
@@ -100,6 +103,10 @@ import { WebsocketsModule } from './websockets/websockets.module';
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
+
+    // Only enable on Production
+
+    // KeepAliveService,
 
     // This only works on CRUD - REST API, not for GraphQL
 
