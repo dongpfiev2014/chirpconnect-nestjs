@@ -1,12 +1,12 @@
 ﻿SELECT TOP (1000) [PostId]
       ,[Content]
+      ,[ContentNoDiacritics]
       ,[Pinned]
       ,[CreatedAt]
       ,[UpdatedAt]
       ,[PostedBy]
-	  ,[OriginalPost]
-	  ,[ReplyTo]
-	  ,[ContentNoDiacritics]
+      ,[OriginalPost]
+      ,[ReplyTo]
   FROM [dbo].[Post]
 
 
@@ -20,7 +20,7 @@ WHERE [PostedBy] = 'B1B7174F-0E65-EF11-BDFD-6045BD1DF899'
 
 
 -- Xóa Full-Text Index
-DROP FULLTEXT INDEX ON Post;
+DROP FULLTEXT INDEX ON [dbo].[Post];
 
 -- Xóa Full-Text Catalog nếu không còn cần thiết
 DROP FULLTEXT CATALOG PostCatalog;
@@ -70,7 +70,7 @@ FROM sys.fulltext_catalogs;
 
 SELECT * 
 FROM Post 
-WHERE CONTAINS(ContentNoDiacritics, '"Cuoc song"');
+WHERE CONTAINS(ContentNoDiacritics, '"everyone"');
 
 */
 

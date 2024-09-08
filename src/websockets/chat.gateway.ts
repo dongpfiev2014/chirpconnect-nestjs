@@ -72,15 +72,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('typing')
   handleTyping(@MessageBody() room, @ConnectedSocket() client: Socket) {
-    console.log(room);
-    console.log('Typing ok :)))');
     client.in(room).emit('typing');
   }
 
   @SubscribeMessage('stop typing')
   handleStopTyping(@MessageBody() room, @ConnectedSocket() client: Socket) {
-    console.log(room);
-    console.log('Stop Typing :)))');
     client.in(room).emit('stop typing');
   }
 

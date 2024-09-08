@@ -29,7 +29,7 @@ import { NotificationModule } from './notification/notification.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [`.env.stage.aws.${process.env.STAGE}`],
+      envFilePath: [`.env.stage.google.${process.env.STAGE}`],
       validationSchema: configValidationSchema,
       isGlobal: true,
     }),
@@ -48,7 +48,7 @@ import { NotificationModule } from './notification/notification.module';
           configService.get('NODE_ENV') === 'production' ? false : true,
         logging: false,
         options: {
-          // encrypt: true,
+          encrypt: true,
           trustServerCertificate: true,
           enableArithAbort: true,
           connectionTimeout: 30000,
