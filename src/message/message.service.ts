@@ -5,12 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
 import { Chat } from 'src/chat/entities/chat.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectRepository(Message) private messageRepository: Repository<Message>,
     @InjectRepository(Chat) private chatRepository: Repository<Chat>,
+    private notificationService: NotificationService,
   ) {}
   async create(createMessageInput: CreateMessageInput) {
     const message = await this.messageRepository.create({
@@ -25,15 +27,33 @@ export class MessageService {
         where: { MessageId: savedMessage.MessageId },
         relations: ['Sender', 'Chat', 'Chat.Users'],
       }),
-      this.chatRepository.update(
-        { ChatId: createMessageInput.ChatId },
-        {
-          LatestMessage: { MessageId: savedMessage.MessageId },
-        },
-      ),
+      this.chatRepository
+        .createQueryBuilder()
+        .update('chat')
+        .set({ LatestMessageId: savedMessage.MessageId })
+        .where('chat.ChatId = :ChatId', { ChatId: createMessageInput.ChatId })
+        .execute(),
     ]);
+    const updatedChat = await this.chatRepository.findOne({
+      where: { ChatId: createMessageInput.ChatId },
+      relations: ['Users'],
+    });
+    this.insertNotifications(result, updatedChat);
 
     return result;
+  }
+
+  insertNotifications(message: Message, chat: Chat) {
+    chat.Users.forEach((user) => {
+      if (user.UserId === message.Sender.UserId) return;
+      this.notificationService.insertNotification({
+        UserToId: user.UserId,
+        UserFromId: message.Sender.UserId,
+        NotificationType: 'newMessage',
+        EntityId: message.Chat.ChatId,
+      });
+    });
+    return;
   }
 
   async findAll(ChatId: string) {

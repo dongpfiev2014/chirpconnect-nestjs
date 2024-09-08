@@ -95,7 +95,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() newMessage: Message,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(newMessage);
     const chat = newMessage.Chat;
     if (!chat.Users) {
       return console.log('Chat.Users not defined');

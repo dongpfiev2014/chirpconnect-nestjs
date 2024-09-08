@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { UpdateNotificationInput } from './dto/update-notification.input';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
+import { TokenPayload } from 'src/auth/token-payload.interface';
 
 @Injectable()
 export class NotificationService {
@@ -35,8 +36,15 @@ export class NotificationService {
     }
   }
 
-  findAll() {
-    return `This action returns all notification`;
+  async findAll(user: TokenPayload) {
+    return await this.notificationRepository.find({
+      where: {
+        UserTo: { UserId: user.UserId },
+        NotificationType: Not('newMessage'),
+      },
+      relations: ['UserTo', 'UserFrom'],
+      order: { CreatedAt: 'DESC' },
+    });
   }
 
   findOne(id: number) {

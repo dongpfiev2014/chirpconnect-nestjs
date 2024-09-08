@@ -822,8 +822,8 @@ function markNotificationsAsOpened(notificationId = null, callback = null) {
 
   var url =
     notificationId != null
-      ? `/api/notifications/${notificationId}/markAsOpened`
-      : `/api/notifications/markAsOpened`;
+      ? `/notification/api/${notificationId}/markAsOpened`
+      : `/notification/api/markAsOpened`;
   $.ajax({
     url: url,
     type: 'PUT',
@@ -889,10 +889,10 @@ function outputNotificationList(notifications, container) {
 }
 
 function createNotificationHtml(notification) {
-  var userFrom = notification.userFrom;
+  var userFrom = notification.UserFrom;
   var text = getNotificationText(notification);
   var href = getNotificationUrl(notification);
-  var className = notification.opened ? '' : 'active';
+  var className = notification.Opened ? '' : 'active';
 
   return `<a href='${href}' class='resultListItem notification ${className}' data-id='${notification.NotificationId}'>
               <div class='resultsImageContainer'>
@@ -905,7 +905,7 @@ function createNotificationHtml(notification) {
 }
 
 function getNotificationText(notification) {
-  var userFrom = notification.userFrom;
+  var userFrom = notification.UserFrom;
 
   if (!userFrom.FirstName || !userFrom.LastName) {
     return alert('user from data not populated');
@@ -915,13 +915,13 @@ function getNotificationText(notification) {
 
   var text;
 
-  if (notification.notificationType == 'retweet') {
+  if (notification.NotificationType == 'retweet') {
     text = `${userFromName} retweeted one of your posts`;
-  } else if (notification.notificationType == 'postLike') {
+  } else if (notification.NotificationType == 'postLike') {
     text = `${userFromName} liked one of your posts`;
-  } else if (notification.notificationType == 'reply') {
+  } else if (notification.NotificationType == 'reply') {
     text = `${userFromName} replied to one of your posts`;
-  } else if (notification.notificationType == 'follow') {
+  } else if (notification.NotificationType == 'follow') {
     text = `${userFromName} followed you`;
   }
 
@@ -932,13 +932,13 @@ function getNotificationUrl(notification) {
   var url = '#';
 
   if (
-    notification.notificationType == 'retweet' ||
-    notification.notificationType == 'postLike' ||
-    notification.notificationType == 'reply'
+    notification.NotificationType == 'retweet' ||
+    notification.NotificationType == 'postLike' ||
+    notification.NotificationType == 'reply'
   ) {
-    url = `/posts/${notification.entityId}`;
-  } else if (notification.notificationType == 'follow') {
-    url = `/profile/${notification.entityId}`;
+    url = `/post/${notification.EntityId}`;
+  } else if (notification.NotificationType == 'follow') {
+    url = `/profile/${notification.EntityId}`;
   }
 
   return url;
