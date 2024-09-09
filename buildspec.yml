@@ -1,18 +1,19 @@
 version: 0.2
-
 phases:
   install:
     runtime-versions:
       nodejs: 18
     commands:
+      - echo Installing yarn...
       - npm install -g yarn
   pre_build:
     commands:
+      - echo Installing dependencies...
       - yarn install
   build:
     commands:
+      - echo Building project...
       - yarn build
-
 artifacts:
   files:
     - '**/*'
