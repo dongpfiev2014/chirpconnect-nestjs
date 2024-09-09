@@ -300,7 +300,6 @@ export class PostService {
 
   async updatePinned(PostId: string, UserId: string, Pinned: boolean) {
     return this.entityManager.transaction(async (manager) => {
-      console.log(PostId, UserId, Pinned);
       let post;
       if (Pinned) {
         await manager

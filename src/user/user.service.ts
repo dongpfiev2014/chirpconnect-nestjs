@@ -61,7 +61,7 @@ export class UserService {
       'AdminPermission-AllUsers',
     );
     if (users && users.length !== 0) {
-      console.log('Users from cache');
+      // console.log('Users from cache');
       return users.map((user) => ({
         ...user,
         CreatedAt: new Date(user.CreatedAt),
@@ -74,7 +74,7 @@ export class UserService {
       this.cacheManager
         .set('AdminPermission-AllUsers', result, 10000)
         .then(() => {
-          console.log('Users from Database');
+          // console.log('Users from Database');
         });
     });
 
@@ -90,7 +90,6 @@ export class UserService {
       return queryBuilder.getMany();
     } else {
       const searchFullText = this.removeDiacritics(search);
-      console.log(searchFullText, search);
       return queryBuilder
         .leftJoinAndSelect('user.Following', 'Following')
         .leftJoinAndSelect('user.Followers', 'Followers')
@@ -146,7 +145,6 @@ export class UserService {
 
   async remove(UserId: string): Promise<boolean> {
     const result = await this.userRepository.delete(UserId);
-    console.log(result);
     if (result.affected === 0) {
       throw new NotFoundException('User not found');
     }

@@ -18,7 +18,6 @@ socket.on('notification received', () => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function emitNotification(userId) {
-  console.log(userId);
   if (userId == userLoggedIn.UserId) return;
 
   socket.emit('notification received', userId);

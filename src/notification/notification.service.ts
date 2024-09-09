@@ -59,7 +59,6 @@ export class NotificationService {
       .where('NotificationId = :NotificationId', { NotificationId })
       .output('INSERTED.*')
       .execute();
-    console.log(notification.raw[0]);
     return notification.raw[0];
   }
 

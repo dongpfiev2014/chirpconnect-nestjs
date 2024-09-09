@@ -192,7 +192,7 @@ $('#filePhoto').change(function () {
     };
     reader.readAsDataURL(this.files[0]);
   } else {
-    console.log('nope');
+    // console.log('nope');
   }
 });
 
@@ -805,7 +805,6 @@ function getOtherChatUsers(users) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function messageReceived(newMessage) {
-  console.log(newMessage);
   if ($(`[data-room="${newMessage.Chat.ChatId}"]`).length == 0) {
     // Show popup notification
     showMessagePopup(newMessage);

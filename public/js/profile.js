@@ -11,7 +11,6 @@ function loadPosts() {
     '/post/api/pinned',
     { postedBy: profileUserId, pinned: true },
     (results) => {
-      console.log(results);
       outputPinnedPost(results, $('.pinnedPostContainer'));
     },
   );

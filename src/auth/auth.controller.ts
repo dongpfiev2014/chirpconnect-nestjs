@@ -75,11 +75,10 @@ export class AuthController {
 
     if (FirstName && LastName && Username && Email && Password) {
       try {
-        const newUser = await this.graphqlService.mutateData<any>(
+        const _newUser = await this.graphqlService.mutateData<any>(
           CREATE_USER_MUTATION,
           { input: payload },
         );
-        console.log(newUser);
         return {
           ...payload,
           successMessage:

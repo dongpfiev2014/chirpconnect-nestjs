@@ -14,7 +14,7 @@ export class AppService {
       .get('https://jsonplaceholder.typicode.com/users')
       .then((res) => res.data);
     // await this.cacheManager.set('my_key', response, 30000);
-    console.log('From API');
+    // console.log('From API');
 
     //When something changes
     // await this.cacheManager.del(`user_${userId}_key`);

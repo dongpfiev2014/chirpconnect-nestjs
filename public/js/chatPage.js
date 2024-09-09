@@ -37,7 +37,6 @@ $(document).ready(() => {
 
 $('#chatNameButton').click(() => {
   var name = $('#chatNameTextbox').val().trim();
-  console.log(name);
 
   $.ajax({
     url: '/chat/api/' + chatId,
@@ -113,7 +112,6 @@ function sendMessage(content) {
     '/message/api',
     { content: content, chatId: chatId },
     (data, status, xhr) => {
-      console.log(data, xhr);
       if (xhr.status !== 201) {
         toastr.error('Could not send message', 'Alert', {
           closeButton: true,
