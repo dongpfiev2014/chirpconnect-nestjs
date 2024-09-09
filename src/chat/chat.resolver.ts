@@ -17,8 +17,12 @@ export class ChatResolver {
   }
 
   @Query(() => [Chat], { name: 'findAllChats' })
-  findAll(@Args('UserId', { type: () => ID }) UserId: string) {
-    return this.chatService.findAll(UserId);
+  findAll(
+    @Args('UserId', { type: () => ID }) UserId: string,
+    @Args('unreadOnly', { type: () => Boolean, nullable: true })
+    unreadOnly?: boolean,
+  ) {
+    return this.chatService.findAll(UserId, unreadOnly);
   }
 
   @Query(() => Chat, { name: 'findOneChat' })

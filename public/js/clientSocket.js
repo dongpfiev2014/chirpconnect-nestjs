@@ -10,7 +10,7 @@ socket.on('connected', () => (connected = true));
 socket.on('message received', (newMessage) => messageReceived(newMessage));
 
 socket.on('notification received', () => {
-  $.get('/api/notifications/latest', (notificationData) => {
+  $.get('/notification/api/latest', (notificationData) => {
     showNotificationPopup(notificationData);
     refreshNotificationsBadge();
   });
@@ -18,6 +18,7 @@ socket.on('notification received', () => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function emitNotification(userId) {
+  console.log(userId);
   if (userId == userLoggedIn.UserId) return;
 
   socket.emit('notification received', userId);

@@ -169,6 +169,13 @@ export class UserService {
         where: { Username },
         relations: ['Following', 'Followers'],
       });
+      if (!found) {
+        found = await this.userRepository.findOne({
+          where: { UserId: Username },
+          relations: ['Following', 'Followers'],
+        });
+      }
+
       return found;
     } catch (error) {
       throw new NotFoundException('User not found');

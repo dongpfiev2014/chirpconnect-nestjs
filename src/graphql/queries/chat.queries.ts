@@ -16,8 +16,8 @@ export const CREATE_CHAT_MUTATION = gql`
 `;
 
 export const FIND_ALL_CHATS_QUERY = gql`
-  query FindAllChats($UserId: ID!) {
-    findAllChats(UserId: $UserId) {
+  query FindAllChats($UserId: ID!, $unreadOnly: Boolean) {
+    findAllChats(UserId: $UserId, unreadOnly: $unreadOnly) {
       ChatId
       ChatName
       IsGroupChat

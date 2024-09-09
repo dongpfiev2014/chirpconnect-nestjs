@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNotificationInput } from './dto/create-notification.input';
-import { UpdateNotificationInput } from './dto/update-notification.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
@@ -36,26 +35,49 @@ export class NotificationService {
     }
   }
 
-  async findAll(user: TokenPayload) {
+  async findAll(user: TokenPayload, unreadOnly: boolean) {
+    let whereOptions: any;
+    whereOptions = {
+      UserTo: { UserId: user.UserId },
+      NotificationType: Not('newMessage'),
+    };
+    if (unreadOnly !== undefined && unreadOnly !== null && unreadOnly) {
+      whereOptions = { ...whereOptions, Opened: false };
+    }
     return await this.notificationRepository.find({
-      where: {
-        UserTo: { UserId: user.UserId },
-        NotificationType: Not('newMessage'),
-      },
+      where: whereOptions,
       relations: ['UserTo', 'UserFrom'],
       order: { CreatedAt: 'DESC' },
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async markAsOpened(user: TokenPayload, NotificationId: string) {
+    const notification = await this.notificationRepository
+      .createQueryBuilder()
+      .update('notification')
+      .set({ Opened: true })
+      .where('NotificationId = :NotificationId', { NotificationId })
+      .output('INSERTED.*')
+      .execute();
+    console.log(notification.raw[0]);
+    return notification.raw[0];
   }
 
-  update(id: number, _updateNotificationInput: UpdateNotificationInput) {
-    return `This action updates a #${id} notification`;
+  async markAllAsOpened(user: TokenPayload): Promise<void> {
+    const notification = await this.notificationRepository
+      .createQueryBuilder()
+      .update('notification')
+      .set({ Opened: true })
+      .where('UserTo = :UserTo', { UserTo: user.UserId })
+      .execute();
+    if (notification.affected === 1) return;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async getLatestNotification(user: TokenPayload) {
+    return await this.notificationRepository.findOne({
+      where: { UserTo: { UserId: user.UserId } },
+      relations: ['UserTo', 'UserFrom'],
+      order: { CreatedAt: 'DESC' },
+    });
   }
 }

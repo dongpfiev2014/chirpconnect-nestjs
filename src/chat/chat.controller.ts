@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
@@ -20,6 +21,7 @@ import {
 } from 'src/graphql/queries/chat.queries';
 import { FIND_ALL_MESSAGES_QUERY } from 'src/graphql/queries/message.queries';
 import { GraphQLService } from 'src/graphql/service/graphql.service';
+import { MessageService } from 'src/message/message.service';
 import { User } from 'src/user/entities/user.entity';
 
 @Controller('chat')
@@ -28,6 +30,7 @@ export class ChatController {
   private readonly graphqlService: GraphQLService;
   constructor(
     @Inject('APOLLO_CLIENT') private readonly apolloClient: ApolloClient<any>,
+    private readonly messageService: MessageService,
   ) {
     this.graphqlService = new GraphQLService(apolloClient);
   }
@@ -62,12 +65,16 @@ export class ChatController {
   }
 
   @Get('/api')
-  async getChats(@CurrentUser() user: TokenPayload) {
+  async getChats(
+    @CurrentUser() user: TokenPayload,
+    @Query('unreadOnly') unreadOnly: string,
+  ) {
     try {
       const chats = await this.graphqlService.mutateData<any>(
         FIND_ALL_CHATS_QUERY,
         {
           UserId: user.UserId,
+          unreadOnly: unreadOnly === 'true',
         },
       );
       return chats.findAllChats;
@@ -140,5 +147,13 @@ export class ChatController {
         errorMessage: error.message,
       };
     }
+  }
+
+  @Put('/api/:ChatId/messages/markAsRead')
+  async markAsReadMessages(
+    @CurrentUser() user: TokenPayload,
+    @Param('ChatId') ChatId: string,
+  ) {
+    return this.messageService.markAsReadMessages(user, ChatId);
   }
 }

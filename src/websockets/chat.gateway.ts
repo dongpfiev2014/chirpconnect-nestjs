@@ -100,4 +100,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.in(user.UserId).emit('message received', newMessage);
     });
   }
+
+  @SubscribeMessage('notification received')
+  getLatestNotification(
+    @MessageBody() userId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.in(userId).emit('notification received');
+  }
 }

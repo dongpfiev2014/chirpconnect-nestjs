@@ -23,7 +23,7 @@ export class ChatService {
     return result;
   }
 
-  async findAll(UserId: string) {
+  async findAll(UserId: string, unreadOnly: boolean) {
     const chats = await this.chatRepository
       .createQueryBuilder('chat')
       .leftJoinAndSelect('chat.Users', 'user')
@@ -46,6 +46,18 @@ export class ChatService {
       .setParameter('UserId', UserId)
       .orderBy('chat.CreatedAt', 'DESC')
       .getMany();
+
+    if (unreadOnly !== undefined && unreadOnly !== null && unreadOnly) {
+      const readOnlyChats = chats.filter(
+        (chat) =>
+          chat.LatestMessage &&
+          !chat.LatestMessage.ReadBy.some(
+            (message) => message.UserId == UserId,
+          ),
+      );
+
+      return readOnlyChats;
+    }
 
     return chats;
   }

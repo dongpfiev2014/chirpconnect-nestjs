@@ -27,7 +27,17 @@ export const CREATE_MESSAGE_MUTATION = gql`
           FirstName
           LastName
           Username
+          ProfilePic
         }
+        LatestMessage {
+          MessageId
+          Content
+          CreatedAt
+          UpdatedAt
+        }
+      }
+      ReadBy {
+        UserId
       }
     }
   }

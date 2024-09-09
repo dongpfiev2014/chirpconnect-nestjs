@@ -56,6 +56,7 @@ $('#submitPostButton, #submitReplyButton').click(() => {
 
   $.post('/post/api', data, (postData) => {
     if (postData.ReplyTo) {
+      emitNotification(postData.ReplyTo.PostedBy.UserId);
       location.reload();
     } else {
       var html = createPostHtml(postData);
@@ -81,7 +82,6 @@ $('#replyModal').on('hidden.bs.modal', () =>
 );
 
 $('#deletePostModal').on('show.bs.modal', (event) => {
-  console.log(event);
   var button = $(event.relatedTarget);
   var postId = getPostIdFromElement(button);
   $('#deletePostButton').data('id', postId);
@@ -130,7 +130,6 @@ $('#deletePostButton').click((event) => {
 
 $('#pinPostButton').click((event) => {
   var postId = $(event.target).data('id');
-  console.log(postId);
 
   $.ajax({
     url: `/post/api/${postId}`,
@@ -154,7 +153,6 @@ $('#pinPostButton').click((event) => {
 
 $('#unpinPostButton').click((event) => {
   var postId = $(event.target).data('id');
-  console.log(postId);
 
   $.ajax({
     url: `/post/api/${postId}`,
@@ -310,8 +308,7 @@ $('#coverPhotoButton').click(() => {
       processData: false,
       contentType: false,
       success: () => location.reload(),
-      error: (x) => {
-        console.log(x);
+      error: () => {
         toastr.error(
           'Make sure it is an image file and not exceed 10mb',
           'Alert',
@@ -387,6 +384,7 @@ $(document).on('click', '.likeButton', (event) => {
         postData.LikedBy.some((user) => user.UserId === userLoggedIn.UserId)
       ) {
         button.addClass('active');
+        emitNotification(postData.PostedBy.UserId);
       } else {
         button.removeClass('active');
       }
@@ -412,6 +410,7 @@ $(document).on('click', '.retweetButton', (event) => {
         )
       ) {
         button.addClass('active');
+        emitNotification(postData.PostedBy.UserId);
       } else {
         button.removeClass('active');
       }
@@ -436,7 +435,6 @@ $(document).on('click', '.followButton', (e) => {
     url: `/user/api/${userId}/follow`,
     type: 'PUT',
     success: (data, status, xhr) => {
-      console.log(data);
       if (xhr.status !== 200) {
         toastr.error('User not found !!', 'Alert', {
           closeButton: true,
@@ -454,6 +452,7 @@ $(document).on('click', '.followButton', (e) => {
       ) {
         button.addClass('following');
         button.text('Following');
+        emitNotification(userId);
       } else {
         button.removeClass('following');
         button.text('Follow');
@@ -693,7 +692,6 @@ function outputPostsWithReplies(results, container) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function outputUsers(results, container) {
-  console.log(results);
   container.html('');
 
   results.forEach((result) => {
@@ -807,6 +805,7 @@ function getOtherChatUsers(users) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function messageReceived(newMessage) {
+  console.log(newMessage);
   if ($(`[data-room="${newMessage.Chat.ChatId}"]`).length == 0) {
     // Show popup notification
     showMessagePopup(newMessage);
@@ -832,7 +831,7 @@ function markNotificationsAsOpened(notificationId = null, callback = null) {
 }
 
 function refreshMessagesBadge() {
-  $.get('/api/chats', { unreadOnly: true }, (data) => {
+  $.get('/chat/api', { unreadOnly: true }, (data) => {
     var numResults = data.length;
 
     if (numResults > 0) {
@@ -844,7 +843,7 @@ function refreshMessagesBadge() {
 }
 
 function refreshNotificationsBadge() {
-  $.get('/api/notifications', { unreadOnly: true }, (data) => {
+  $.get('/notification/api', { unreadOnly: true }, (data) => {
     var numResults = data.length;
 
     if (numResults > 0) {

@@ -29,6 +29,9 @@ export const CREATE_POST_MUTATION = gql`
       }
       ReplyTo {
         PostId
+        PostedBy {
+          UserId
+        }
       }
     }
   }
@@ -216,6 +219,13 @@ export const UPDATE_POST_LIKES_MUTATION = gql`
         UserId
         Username
       }
+      PostedBy {
+        UserId
+        FirstName
+        LastName
+        Username
+        ProfilePic
+      }
     }
   }
 `;
@@ -225,6 +235,9 @@ export const UPDATE_RETWEET_MUTATION = gql`
     updateRetweet(PostId: $PostId, UserId: $UserId) {
       PostId
       RetweetUsers {
+        UserId
+      }
+      PostedBy {
         UserId
       }
     }
