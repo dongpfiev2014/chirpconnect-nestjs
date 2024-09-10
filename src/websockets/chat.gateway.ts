@@ -26,7 +26,7 @@ import { Message } from 'src/message/entities/message.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://chirpconnect.ap-southeast-2.elasticbeanstalk.com',
+    origin: 'https://chirpconnect.fun',
     credentials: true,
   },
 })

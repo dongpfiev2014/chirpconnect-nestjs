@@ -39,7 +39,7 @@ Chirpconnect is a social networking application built with NestJS for the backen
 
 Check out the live demo of ChirpConnect:
 
-[https://your-live-demo-url](#)
+[https://chirpconnect.fun](#)
 
 ## Technologies Used
 
