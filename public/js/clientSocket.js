@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var connected = false;
 
-var socket = io('https://chirpconnect.fun');
+var socket = io(`${window.location.origin}`);
 
 socket.emit('setup', userLoggedIn);
 

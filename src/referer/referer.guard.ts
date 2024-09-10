@@ -8,11 +8,7 @@ export class RefererGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const referer = request.headers.referer;
-    const allowedReferer = [
-      'http://localhost:3000',
-      'https://localhost:3002',
-      'https://chirpconnect.fun',
-    ];
+    const allowedReferer = ['http://localhost:3000', 'https://localhost:3002'];
 
     if (referer && allowedReferer.includes(referer)) {
       return true;

@@ -24,12 +24,7 @@ import { Message } from 'src/message/entities/message.entity';
 //   Content: string;
 // }
 
-@WebSocketGateway({
-  cors: {
-    origin: 'https://chirpconnect.fun',
-    credentials: true,
-  },
-})
+@WebSocketGateway()
 @UseFilters(new WebsocketExceptionFilter())
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
