@@ -29,7 +29,7 @@ import { NotificationModule } from './notification/notification.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [`.env.stage.google.${process.env.STAGE}`],
+      envFilePath: [`.env`],
       validationSchema: configValidationSchema,
       isGlobal: true,
     }),
