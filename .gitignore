@@ -45,6 +45,7 @@ lerna-debug.log*
 .env.stage.prod
 .env.stage.azure.dev
 .env.stage.google.dev
+.env.stage.google.prod
 
 # temp directory
 .temp
