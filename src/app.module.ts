@@ -59,8 +59,10 @@ import { NotificationModule } from './notification/notification.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      debug: true,
-      playground: true,
+      debug: false,
+      // debug: true,
+      playground: false,
+      // playground: true,
       introspection: true,
       context: ({ req }) => ({ req }),
     }),
