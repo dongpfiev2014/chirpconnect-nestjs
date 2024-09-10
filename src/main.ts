@@ -67,12 +67,12 @@ async function bootstrap() {
 
   // app.setGlobalPrefix('api/v1', { exclude: ['/user/(.*)', ''] });
 
-  const corsOrigin = configService.get<string>('CORS_ORIGIN');
-  const corsOptions = {
-    origin: corsOrigin,
-    credentials: true,
-  };
-  app.enableCors(corsOptions);
+  // const corsOrigin = configService.get<string>('CORS_ORIGIN');
+  // const corsOptions = {
+  //   origin: corsOrigin,
+  //   credentials: true,
+  // };
+  // app.enableCors(corsOptions);
 
   const port = configService.get<number>('SERVER_PORT') || 4000;
   await app.listen(port);
