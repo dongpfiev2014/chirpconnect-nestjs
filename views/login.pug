@@ -18,6 +18,14 @@ block content
             input(type="submit", value="Login")
         a(href="/auth/register") Need an account? Register here. 
 
+        .info
+            p To test, log in with one of the following accounts:
+            .account-list
+                .account-item
+                    button(type="button" onclick="autoLogin('cristiano@gmail.com', 'Password1@')") Login as Account 01
+                .account-item
+                    button(type="button" onclick="autoLogin('lionel@gmail.com', 'Password1@')") Login as Account 02
+
     script.
         const form = document.getElementById("registerForm")
 
@@ -25,5 +33,11 @@ block content
             setTimeout(() => {
                 window.location.href = '/';
             }, 100); 
+        }
+
+        function autoLogin(email, password) {
+            document.querySelector('input[name="Email"]').value = email;
+            document.querySelector('input[name="Password"]').value = password;
+            document.querySelector('form').submit();
         }
             
