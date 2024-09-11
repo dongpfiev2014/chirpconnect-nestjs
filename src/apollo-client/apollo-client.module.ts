@@ -1,4 +1,4 @@
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client/core';
+import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { Global, Module } from '@nestjs/common';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
@@ -9,15 +9,12 @@ import { REQUEST } from '@nestjs/core';
     {
       provide: 'APOLLO_CLIENT',
       useFactory: (req: Request) => {
-        const protocol = req.protocol;
+        // const protocol = req.protocol;
         const host = req.get('host');
-        const apiUrl = `${protocol}://${host}/graphql`;
+        const apiUrl = `http://${host}/graphql`;
         return new ApolloClient({
-          link: new HttpLink({
-            uri: apiUrl,
-          }),
           cache: new InMemoryCache(),
-          // uri: apiUrl,
+          uri: apiUrl,
         });
       },
       inject: [REQUEST],
