@@ -1,23 +1,21 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { Global, Module } from '@nestjs/common';
-import { Request } from 'express';
-import { REQUEST } from '@nestjs/core';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({
+  imports: [ConfigModule],
   providers: [
     {
+      inject: [ConfigService],
       provide: 'APOLLO_CLIENT',
-      useFactory: (req: Request) => {
-        // const protocol = req.protocol;
-        const host = req.get('host');
-        const apiUrl = `http://${host}/graphql`;
+      useFactory: (configService: ConfigService) => {
+        const apiUrl = configService.get<string>('API_URL');
         return new ApolloClient({
           cache: new InMemoryCache(),
-          uri: apiUrl,
+          uri: `${apiUrl}/graphql`,
         });
       },
-      inject: [REQUEST],
     },
   ],
   exports: ['APOLLO_CLIENT'],
