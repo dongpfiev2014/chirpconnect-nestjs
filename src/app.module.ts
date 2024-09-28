@@ -11,7 +11,7 @@ import { UserModule } from './user/user.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
+// import { redisStore } from 'cache-manager-redis-yet';
 import { ApolloClientModule } from './apollo-client/apollo-client.module';
 import { AuthModule } from './auth/auth.module';
 // import { RedirectMiddleware } from './middleware/redirect.middleware';
@@ -72,17 +72,18 @@ import { NotificationModule } from './notification/notification.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         // This works on the cache in the Memory Server.
-        // ttl: parseInt(configService.get<string>('CACHE_TTL'), 10),
+
+        ttl: parseInt(configService.get<string>('CACHE_TTL'), 10),
 
         // This works on the Redis Cloud.
-        store: await redisStore({
-          socket: {
-            host: configService.get<string>('REDIS_HOST'),
-            port: configService.get<number>('REDIS_PORT'),
-          },
-          password: configService.get<string>('REDIS_PASSWORD'),
-          ttl: configService.get<number>('CACHE_TTL'),
-        }),
+        // store: await redisStore({
+        //   socket: {
+        //     host: configService.get<string>('REDIS_HOST'),
+        //     port: configService.get<number>('REDIS_PORT'),
+        //   },
+        //   password: configService.get<string>('REDIS_PASSWORD'),
+        //   ttl: configService.get<number>('CACHE_TTL'),
+        // }),
       }),
     }),
     UserModule,
